@@ -24,10 +24,23 @@ public interface UserRepository extends JpaRepository<User , Long>{
     User findByPhonenumber(String phonenumber);
     User findByEmail(String email);
 
+//    @Modifying
+//    @Transactional
+//    @Query("update User u set u.password = :password where u.phonenumber = :phonenumber")
+//    int updatePassword(@Param("password") String password, @Param("phonenumber") String phonenumber);
+
     @Modifying
     @Transactional
-    @Query("update User u set u.password = :password where u.phonenumber = :phonenumber")
-    int updatePassword(@Param("password") String password, @Param("phonenumber") String phonenumber);
+    @Query("update User u set u.passwordupdatetoken = :passwordupdatetoken where u.phonenumber = :phonenumber")
+    int uodatePasswordToken(@Param("passwordupdatetoken") String passwordupdatetoken, @Param("phonenumber") String phonenumber);
 
+
+    @Modifying
+    @Transactional
+    @Query("update User u set u.password = :password where u.passwordupdatetoken = :passwordupdatetoken and u.phonenumber = :phonenumber")
+    int changePassword (@Param("password") String password,@Param("passwordupdatetoken") String passwordupdatetoken,@Param("phonenumber") String phonenumber);
+
+    @Query("select u.passwordupdatetoken from User u where u.phonenumber = :phonenumber")
+    String verifyPhonenumberToken(@Param("phonenumber") String phonenumber);
 
 }

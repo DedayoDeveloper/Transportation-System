@@ -51,6 +51,17 @@ public class User {
     @Column(name = "kinaddress", nullable = false)
     private String kinaddress;
 
+    @Column(name = "passwordupdatetoken", nullable = false)
+    private String passwordupdatetoken;
+
+    public String getPasswordupdatetoken() {
+        return passwordupdatetoken;
+    }
+
+    public void setPasswordupdatetoken(String passwordupdatetoken) {
+        this.passwordupdatetoken = passwordupdatetoken;
+    }
+
     public String getKinname() {
         return kinname;
     }

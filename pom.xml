@@ -49,6 +49,12 @@
                     <artifactId>jjwt</artifactId>
                     <version>0.9.1</version>
                 </dependency>
+
+		<dependency>
+			<groupId>com.twilio.sdk</groupId>
+			<artifactId>twilio</artifactId>
+			<version>7.20.0</version>
+		</dependency>
                 
                 <dependency>
                     <groupId>mysql</groupId>
@@ -72,14 +78,8 @@
                 </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                </exclusion>
-            </exclusions>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-logging</artifactId>
         </dependency>
 
                 

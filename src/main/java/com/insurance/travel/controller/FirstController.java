@@ -5,6 +5,7 @@
  */
 package com.insurance.travel.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.insurance.travel.fileupload.FileStorageService;
 import com.insurance.travel.fileupload.Response;
 import com.insurance.travel.model.AuthenticationRequest;
@@ -77,15 +78,25 @@ public class FirstController {
     // THIS IS THE CONTROLLER METHOD FOR A CUSTOMER USER
       
     
-    // GET API AUTHENTICATION
+    // GET API AUTHENTICATION AND LOGIN
        @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody User authenticationRequest) throws Exception {
         try {
-            authenticationmanager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
+            authenticationmanager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getPhonenumber(), authenticationRequest.getPassword()));
         } catch (BadCredentialsException e) {
             throw new Exception("incorrect username and password", e);
         }
-        final UserDetails userDetails = myUserDetailsService.loadUserByUsername(authenticationRequest.getUsername());
+        final UserDetails userDetails = myUserDetailsService.loadUserByUsername(authenticationRequest.getPhonenumber());
+           if (userDetails == null) {
+               throw new RuntimeException("User does not exist.");
+           }
+          User user = userinterface.signIn(authenticationRequest.getPhonenumber(), authenticationRequest.getPassword());
+           try{
+               ObjectMapper mapper = new ObjectMapper();
+               System.out.println(mapper.writeValueAsString(userDetails));
+           }catch (Exception e){
+
+           }
         final String jwt = jwttokenutil.generateToken(userDetails);
         return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }
@@ -101,19 +112,7 @@ public class FirstController {
     u.setStatus(HttpStatus.CREATED);
     return u;
     }
-    
-    
-  // USER SIGN IN
-    @PostMapping("/login")
-    public ApiResponse<User> userLogin(@RequestBody User user){
-        ApiResponse<User> u = new ApiResponse<>();
-        u.setResponse(userinterface.signIn(user.getPhonenumber(), user.getPassword()));
-        u.setMessage("Success");
-        u.setStatus(HttpStatus.OK);
-        return u;
-    }
-    
-    
+
     
     // UPDATE USER PROFILE
 
@@ -249,16 +248,25 @@ public class FirstController {
 
     // UPDATE USER PASSWORD
     @PostMapping("/updatepassword")
-    public ApiResponse<String> updateUserPassword(@RequestBody User user){
+    public ApiResponse<String> sendTokenToUpdatePassword(@RequestBody User user){
            ApiResponse<String> u = new ApiResponse<>();
-           u.setResponse(userinterface.updatePassword(user.getPassword(),user.getPhonenumber()));
+           u.setResponse(userinterface.sendTokenToUpdatePassword(user.getPhonenumber()));
            u.setStatus(HttpStatus.OK);
            u.setMessage("success");
            return u;
     }
 
 
-
+// VERIFY TOKEN SENT TO PHONENUMBER AND CHANGE PASSWORD
+    @PutMapping("/changepassword")
+    public ApiResponse<String> confirmTokenAndResetPassword(@RequestBody User user){
+           ApiResponse<String> u = new ApiResponse<>();
+        System.out.println("DEBUGGING!!!!");
+           u.setResponse(userinterface.changePassword(user.getPassword(),user.getPasswordupdatetoken(),user.getPhonenumber()));
+           u.setStatus(HttpStatus.OK);
+           u.setMessage("success");
+           return u;
+    }
 
 
 

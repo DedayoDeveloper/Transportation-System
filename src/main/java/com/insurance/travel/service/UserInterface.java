@@ -24,6 +24,7 @@ public interface UserInterface {
     public Trips adminToCreateTripsForBooking(Trips trip);
     public TripBooking searchPassengerOnTrip(TripBooking trip);
     public List<TripBooking> getAllPassengersOnATrip(TripBooking searchTrip);
-    public String updatePassword(String password , String phonenumber);
+    public String sendTokenToUpdatePassword(String phonenumber);
     public int saveFileUploadPathToDatabase(String fileDownloadUri,String vehiclenumber);
+    public String changePassword(String password,String phoneNumberVerificationToken, String phonenumber);
 }

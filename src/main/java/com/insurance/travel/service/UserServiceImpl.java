@@ -13,6 +13,10 @@ import com.insurance.travel.repository.TripBookingRepository;
 import com.insurance.travel.repository.TripsRepository;
 import com.insurance.travel.repository.UserRepository;
 import java.util.List;
+
+import com.twilio.Twilio;
+import com.twilio.rest.api.v2010.account.Message;
+import com.twilio.type.PhoneNumber;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,6 +43,11 @@ public class UserServiceImpl implements UserInterface{
     @Autowired
     @Qualifier("bCryptPasswordEncoder")
     private PasswordEncoder passwordencoder;
+
+    public static final String ACCOUNT_SID =
+            "AC57e344c7aea908f9e5b230c995052ff3";
+    public static final String AUTH_TOKEN =
+            "0f196c60007c235bac3ddd343f3ee0e2";
     
     
     
@@ -58,6 +67,15 @@ public class UserServiceImpl implements UserInterface{
     user.setPassword(passwordencoder.encode(createuser.getPassword()));
     user.setKinname(createuser.getKinname());
     user.setKinphonenumber(createuser.getKinphonenumber());
+  // SEND SMS MESSAGE WITH TWILIO
+        Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
+
+        Message message = Message
+                .creator(new PhoneNumber(user.getPhonenumber()), // to
+                        new PhoneNumber("+18177797043"), // from
+                        "HELLO THIS IS A TEXT MESSAGE APPLICATION TEST")
+                .create();
+
     user.setKinemail(createuser.getKinemail());
     user.setKinaddress(createuser.getKinaddress());
     return repository.save(user);
@@ -173,18 +191,44 @@ public class UserServiceImpl implements UserInterface{
 
 
     @Override
-    public String updatePassword(String password , String phonenumber) {
-        String value = "Password not successfully changed";
-        String encryptpassword = passwordencoder.encode(password);
-        int updatePassword = repository.updatePassword(encryptpassword,phonenumber);
+    public String sendTokenToUpdatePassword(String phonenumber) {
+
+        String value = "Password token not sent";
+
+        String phoneNumberVerificationToken = String.valueOf(Math.random()).substring(2, 6);
+        // SEND SMS MESSAGE WITH TWILIO
+        Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
+
+        Message message = Message
+                .creator(new PhoneNumber(phonenumber), // to
+                        new PhoneNumber("+18177797043"), // from
+                        "HERE IS YOUR TOKEN TO RESET PASSWORD  " + phoneNumberVerificationToken)
+                .create();
+
+        int updatePassword = repository.uodatePasswordToken(phoneNumberVerificationToken,phonenumber);
         if(updatePassword > 0){
-            value = "Password successfully changed";
+            value = "TOKEN SENT TO PHONE NUMBER SUCCESSFULLY";
         }
         return value;
 
     }
 
 
+    @Override
+    public String changePassword(String password,String phoneNumberVerificationToken, String phonenumber){
+        String response = "FAILED";
+        String encryptpassword = passwordencoder.encode(password);
+        String verifyToken = repository.verifyPhonenumberToken(phonenumber);
+        if(verifyToken.contains(phoneNumberVerificationToken)){
+        int changePassword = repository.changePassword(encryptpassword,phoneNumberVerificationToken,phonenumber);
+        if(changePassword > 0) {
+            response = "Password changed successfully";
+        }
+        } else {
+            throw new RuntimeException("Wrong token details");
+        }
+        return response;
+    }
 
 
     @Override
@@ -201,52 +245,8 @@ public class UserServiceImpl implements UserInterface{
 
 
 
-//    public String sendSmsCode(String phoneNo, String message) throws URISyntaxException {
-//        //http://smsmobile24.com/index.php/component/spc/?comm=spc_api&
-//        String baseUrl = mobile.getBaseUrl() + "&username=" + mobile.getUsername() + "&password=" + mobile.getPassword()
-//                + "&sender=" + mobile.getSender() + "&recipient=" + phoneNo + "&message="+mobile.getMessage()+message.replace(" ", "+");
-//        //+ message;
-//
-//        //String ppp = "http://www.smsmobile24.com/index.php?option=com_spc&comm=spc_api&username=xxxxx&password=Peripoints&sender=@@sender@@&recipient=@@recipient@@&message=@@message@@&";
-//        logger.debug("URL:"+baseUrl);
-//        URI uri = new URI(baseUrl);
-//        try {
-//            String response = restTemplate.getForObject(uri, String.class);
-//            OtpMessageLog otpMessageLog = new OtpMessageLog();
-//            otpMessageLog.setMessage(message);
-//            otpMessageLog.setResponse(response);
-//            otpMessageService.saveOtpMessage(otpMessageLog);
-//            return response;
-//        } catch (Exception e) {
-//            logger.debug("System error: " + e.getMessage());
-//            return null;
-//        }
-//
-//    }
 
 
-
-
-
-
-
-//    public String sendSmsBalance() throws URISyntaxException {
-//        String baseUrl = mobile.getBaseUrl() + "&username=" + mobile.getUsername() + "&password=" + mobile.getPassword()
-//                + "&balance=true";
-//
-//        logger.debug("URL:-----"+baseUrl);
-//        //System.out.println("URL:-----"+baseUrl);
-//        URI uri = new URI(baseUrl);
-//        try {
-//            String response = restTemplate.getForObject(uri, String.class);
-//            return "SMS balance is "+response + " units";
-//        } catch (Exception e) {
-//            logger.debug("System error: " + e.getMessage());
-//            return null;
-//        }
-//
-//    }
-//
 
 
 
