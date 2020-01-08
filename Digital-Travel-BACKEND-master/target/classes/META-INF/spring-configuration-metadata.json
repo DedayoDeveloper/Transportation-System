@@ -1,0 +1,17 @@
+{
+  "groups": [
+    {
+      "name": "file",
+      "type": "com.insurance.travel.fileupload.FileStorageProperties",
+      "sourceType": "com.insurance.travel.fileupload.FileStorageProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "file.upload-dir",
+      "type": "java.lang.String",
+      "sourceType": "com.insurance.travel.fileupload.FileStorageProperties"
+    }
+  ],
+  "hints": []
+}
