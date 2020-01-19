@@ -17,7 +17,7 @@ import java.util.List;
 public interface UserInterface {
     
     public User registerUser(User createuser);
-   public User signIn(String phonenumber,String password,String token);
+   public User signIn(User userDetails);
    public String updateUserNextOfKin(String kinname,String kinphonenumber, String kinemail,String kinaddress,String phonenumber);
    public Trips findTrips(String departure,String destination,String date);
    public TripBooking bookTrips(TripBooking book);
@@ -29,4 +29,7 @@ public interface UserInterface {
     public String changePassword(String password,String phoneNumberVerificationToken, String phonenumber);
     public int getTotalAmountOfRegisteredUsers();
     public User createBusStationAdmin(User userAdmin);
+//    public int getAllUsers();
+    public List<User> getListOfAllUsers();
+    public String verifyTokenForUserAuthentication(String token,String phonenumber);
 }

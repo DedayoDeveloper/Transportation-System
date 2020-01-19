@@ -8,12 +8,10 @@ package com.insurance.travel.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.insurance.travel.fileupload.FileStorageService;
 import com.insurance.travel.fileupload.Response;
-import com.insurance.travel.model.AuthenticationRequest;
 import com.insurance.travel.model.AuthenticationResponse;
 import com.insurance.travel.model.TripBooking;
 import com.insurance.travel.model.Trips;
 import com.insurance.travel.model.User;
-import com.insurance.travel.repository.TripsRepository;
 import com.insurance.travel.repository.UserRepository;
 import com.insurance.travel.response.ApiResponse;
 import com.insurance.travel.service.UserInterface;
@@ -91,7 +89,7 @@ public class FirstController {
            if (userDetails == null) {
                throw new RuntimeException("User does not exist.");
            }
-          User user = userinterface.signIn(authenticationRequest.getPhonenumber(), authenticationRequest.getPassword(),authenticationRequest.getToken());
+          User user = userinterface.signIn(authenticationRequest);
            try{
                ObjectMapper mapper = new ObjectMapper();
                System.out.println(mapper.writeValueAsString(userDetails));
@@ -114,9 +112,10 @@ public class FirstController {
     return u;
     }
 
-    
-    // UPDATE USER PROFILE
 
+
+
+    // UPDATE USER PROFILE
     @PutMapping("/updateprofile")
     public ApiResponse<String> updateUserProfile(@RequestBody User user){
     ApiResponse<String> u = new ApiResponse<>();
@@ -150,7 +149,7 @@ public class FirstController {
       }
 
 
-      
+
       // ADMIN TO DELETE A USER
       @DeleteMapping("/deleteuser")
       public ApiResponse<String> deleteUser(@RequestBody User user){
@@ -161,6 +160,7 @@ public class FirstController {
       u.setResponse("User deleted successfully");
       return u;
       }
+
 
 
       
@@ -281,7 +281,7 @@ public class FirstController {
 
 
 
-    // GET TOTAL AMOUNT OF REGISTERED USERS
+    // GET TOTAL AMOUNT OF REGISTERED USERS OR GET ALL USERS FROM THE APPLICATION
     @GetMapping("/getTotalUsers")
     public ApiResponse<Integer> getTotalUsersOnPlatform(){
            ApiResponse<Integer> u = new ApiResponse<>();
@@ -304,8 +304,34 @@ public class FirstController {
 
 
 
+    @GetMapping("/getListOfAllUser")
+    public ApiResponse<List<User>> getListOfAllUsers(){
+           ApiResponse<List<User>> u = new ApiResponse<>();
+           u.setResponse(userinterface.getListOfAllUsers());
+           u.setStatus(HttpStatus.OK);
+        u.setMessage("success");
+        return u;
+    }
 
 
+
+        @PostMapping("/verifyUserAuthenticationLogin")
+        public ApiResponse<String> verifyUserAuthenticationLogin(@RequestBody User user){
+                ApiResponse<String> u = new ApiResponse<>();
+                u.setResponse(userinterface.verifyTokenForUserAuthentication(user.getToken(),user.getPhonenumber()));
+                u.setStatus(HttpStatus.OK);
+                u.setMessage("success");
+                return u;
+        }
+
+        @PostMapping("/verifyUserOTP")
+        public ApiResponse<String> otpVerification(@RequestBody User user){
+            ApiResponse<String> u = new ApiResponse<>();
+            u.setResponse(userinterface.verifyTokenForUserAuthentication(user.getToken(),user.getPhonenumber()));
+            u.setStatus(HttpStatus.OK);
+            u.setMessage("success");
+            return u;
+        }
 
 
 }

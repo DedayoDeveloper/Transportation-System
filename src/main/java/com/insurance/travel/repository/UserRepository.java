@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
 
+
 /**
  *
  * @author oreoluwa
@@ -23,11 +24,6 @@ public interface UserRepository extends JpaRepository<User , Long>{
     
     User findByPhonenumber(String phonenumber);
     User findByEmail(String email);
-
-//    @Modifying
-//    @Transactional
-//    @Query("update User u set u.password = :password where u.phonenumber = :phonenumber")
-//    int updatePassword(@Param("password") String password, @Param("phonenumber") String phonenumber);
 
     @Modifying
     @Transactional
@@ -44,12 +40,24 @@ public interface UserRepository extends JpaRepository<User , Long>{
     String verifyPhonenumberToken(@Param("phonenumber") String phonenumber);
 
 
-    @Query("select count(u) from User u")
-    int getTotalamountOfRegisteredUsers();
-
     @Transactional
     @Modifying
     @Query("update User u set u.enabled = 1 where u.phonenumber = :phonenumber")
     int authenticateUser (@Param("phonenumber") String phonenumber);
+
+
+    @Query("select u.enabled from User u where u.phonenumber = :phonenumber")
+    String getUserAuthorization(@Param("phonenumber") String phonenumber);
+
+    User findByPhonenumberAndAndToken(String phonenumber, String token);
+
+    @Transactional
+    @Modifying
+    @Query("update User u set u.fullname = :fullname, u.email = :email, u.password = :password, u.token = :token where u.phonenumber = :phonenumber")
+    int updateUserDetails(@Param("fullname") String fullname,@Param("email") String email,@Param("password") String password,@Param("token") String token,
+                          @Param("phonenumber") String phonenumber);
+
+
+
 
 }

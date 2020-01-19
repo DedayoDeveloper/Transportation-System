@@ -14,6 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.util.Date;
+
 /**
  *
  * @author oreoluwa
@@ -29,6 +31,11 @@ public class User {
 
     @Column(name = "fullname", nullable = false)
     private String fullname;
+
+    @Column(name = "otpgenerationtime", nullable = false)
+    private Date otpgenerationtime;
+
+
 
     @Column(name = "phonenumber", nullable = false)
     private String phonenumber;
@@ -60,6 +67,14 @@ public class User {
     @Column(name = "role", nullable = true)
     private String role;
 
+    public Date getOtpgenerationtime() {
+        return otpgenerationtime;
+    }
+
+    public void setOtpgenerationtime(Date otpgenerationtime) {
+        this.otpgenerationtime = otpgenerationtime;
+    }
+
     public int getEnabled() {
         return enabled;
     }
@@ -68,7 +83,7 @@ public class User {
         this.enabled = enabled;
     }
 
-    @Column(name = "logintoken", nullable = true)
+    @Column(name = "token", nullable = true)
     private String token;
 
 

@@ -52,7 +52,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
     
     @Override
     protected void configure(HttpSecurity http) throws Exception{
-        http.csrf().disable().authorizeRequests().antMatchers("/authenticate","/registeruser","/updatepassword","/changepassword").permitAll().anyRequest().authenticated()
+        http.csrf().disable().authorizeRequests().antMatchers("/authenticate","/registeruser","/updatepassword","/changepassword","/phonetest","/verifyUserOTP").permitAll().anyRequest().authenticated()
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.addFilterBefore(jwtrequestfilter, UsernamePasswordAuthenticationFilter.class);
 
