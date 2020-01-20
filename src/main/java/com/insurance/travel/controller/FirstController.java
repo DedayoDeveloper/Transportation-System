@@ -271,7 +271,6 @@ public class FirstController {
     @PutMapping("/changepassword")
     public ApiResponse<String> confirmTokenAndResetPassword(@RequestBody User user){
            ApiResponse<String> u = new ApiResponse<>();
-        System.out.println("DEBUGGING!!!!");
            u.setResponse(userinterface.changePassword(user.getPassword(),user.getPasswordupdatetoken(),user.getPhonenumber()));
            u.setStatus(HttpStatus.OK);
            u.setMessage("success");
@@ -309,22 +308,24 @@ public class FirstController {
            ApiResponse<List<User>> u = new ApiResponse<>();
            u.setResponse(userinterface.getListOfAllUsers());
            u.setStatus(HttpStatus.OK);
-        u.setMessage("success");
+           u.setMessage("success");
         return u;
     }
 
 
 
-        @PostMapping("/verifyUserAuthenticationLogin")
-        public ApiResponse<String> verifyUserAuthenticationLogin(@RequestBody User user){
-                ApiResponse<String> u = new ApiResponse<>();
-                u.setResponse(userinterface.verifyTokenForUserAuthentication(user.getToken(),user.getPhonenumber()));
-                u.setStatus(HttpStatus.OK);
-                u.setMessage("success");
-                return u;
-        }
+//        @PostMapping("/verifyUserAuthenticationLogin")
+//        public ApiResponse<String> verifyUserAuthenticationLogin(@RequestBody User user){
+//                ApiResponse<String> u = new ApiResponse<>();
+//                u.setResponse(userinterface.verifyTokenForUserAuthentication(user.getToken(),user.getPhonenumber()));
+//                u.setStatus(HttpStatus.OK);
+//                u.setMessage("success");
+//                return u;
+//        }
 
-        @PostMapping("/verifyUserOTP")
+
+
+        @PutMapping("/verifyUserOTP")
         public ApiResponse<String> otpVerification(@RequestBody User user){
             ApiResponse<String> u = new ApiResponse<>();
             u.setResponse(userinterface.verifyTokenForUserAuthentication(user.getToken(),user.getPhonenumber()));

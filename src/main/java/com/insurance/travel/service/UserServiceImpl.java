@@ -89,6 +89,7 @@ public class UserServiceImpl implements UserInterface{
             throw new RuntimeException("Phone-number registered to an existing user");
         }
         int updateUserDetails = repository.updateUserDetails(createuser.getFullname(),createuser.getEmail(),passwordencoder.encode(createuser.getPassword()), otp,
+                otpGenerationTime,
                 createuser.getPhonenumber());
         if(updateUserDetails == 1){
 
@@ -112,7 +113,7 @@ public class UserServiceImpl implements UserInterface{
     user.setKinphonenumber(createuser.getKinphonenumber());
 
   // SEND SMS MESSAGE WITH TWILIO API
-        String body = " Dear " + createuser.getFullname() + " your profile has been created please submit token " + otp + "to log in, token valid for 30 minutes";
+        String body = " Dear " + createuser.getFullname() + " your profile has been created please submit token " + otp + " to log in, token valid for 30 minutes";
         sendSmsMessage(createuser.getPhonenumber(), body);
 
     user.setToken(otp);

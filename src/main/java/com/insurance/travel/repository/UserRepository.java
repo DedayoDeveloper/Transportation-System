@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
+import java.util.Date;
 
 
 /**
@@ -53,9 +54,15 @@ public interface UserRepository extends JpaRepository<User , Long>{
 
     @Transactional
     @Modifying
-    @Query("update User u set u.fullname = :fullname, u.email = :email, u.password = :password, u.token = :token where u.phonenumber = :phonenumber")
-    int updateUserDetails(@Param("fullname") String fullname,@Param("email") String email,@Param("password") String password,@Param("token") String token,
+    @Query("update User u set u.fullname = :fullname, u.email = :email, u.password = :password, u.token = :token, u.otpgenerationtime = :otpgenerationtime where u.phonenumber = :phonenumber")
+    int updateUserDetails(@Param("fullname") String fullname, @Param("email") String email, @Param("password") String password, @Param("token") String token,
+                          @Param("otpgenerationtime") Date otpgenerationtime,
                           @Param("phonenumber") String phonenumber);
+
+
+
+
+
 
 
 
