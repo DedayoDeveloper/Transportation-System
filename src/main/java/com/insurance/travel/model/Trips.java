@@ -14,6 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.math.BigDecimal;
+
 /**
  *
  * @author oreoluwa
@@ -39,7 +41,7 @@ public class Trips {
     private String date;
     
     @Column(name = "price", nullable = true)
-    private String price;
+    private BigDecimal price;
     
     @Column(name = "seats", nullable = true)
     private String seats;
@@ -53,7 +55,7 @@ public class Trips {
     @Column(name = "vehicletype", nullable = true)
     private String vehicletype;
     
-    @Column(name = "time", nullable = true)
+    @Column(name = "departuretime", nullable = true)
     private String time;
 
     @Column(name = "drivername", nullable = true)
@@ -61,6 +63,39 @@ public class Trips {
 
     @Column(name = "filedownloaduri", nullable = true)
     private String filedownloaduri;
+
+//    @Column(name = "station", nullable = true)
+//    private String station;
+
+    @Column(name = "departurepark", nullable = true)
+    private String departurepark;
+
+    @Column(name = "arrivalpark", nullable = true)
+    private String arrivalpark;
+
+    public String getDeparturepark() {
+        return departurepark;
+    }
+
+    public void setDeparturepark(String departurepark) {
+        this.departurepark = departurepark;
+    }
+
+    public String getArrivalpark() {
+        return arrivalpark;
+    }
+
+    public void setArrivalpark(String arrivalpark) {
+        this.arrivalpark = arrivalpark;
+    }
+
+//    public String getStation() {
+//        return station;
+//    }
+//
+//    public void setStation(String station) {
+//        this.station = station;
+//    }
 
     public String getFiledownloaduri() {
         return filedownloaduri;
@@ -136,11 +171,11 @@ public class Trips {
         this.date = date;
     }
 
-    public String getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(String price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 

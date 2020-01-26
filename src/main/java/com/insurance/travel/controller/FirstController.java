@@ -40,7 +40,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 /**
  *
- * @author oreoluwa
+ * @author adedayo
  */
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -68,13 +68,9 @@ public class FirstController {
      @Autowired
      private UserServiceImpl user;
 
-
-    
-     
-     
     private static final Logger logger = LoggerFactory.getLogger(FirstController.class);
     
-    // THIS IS THE CONTROLLER METHOD FOR A CUSTOMER USER
+
       
     
     // GET API AUTHENTICATION AND LOGIN
@@ -83,7 +79,7 @@ public class FirstController {
         try {
             authenticationmanager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getPhonenumber(), authenticationRequest.getPassword()));
         } catch (BadCredentialsException e) {
-            throw new Exception("incorrect username and password", e);
+            throw new Exception("Wrong credentials", e);
         }
         final UserDetails userDetails = myUserDetailsService.loadUserByUsername(authenticationRequest.getPhonenumber());
            if (userDetails == null) {
@@ -92,7 +88,7 @@ public class FirstController {
           User user = userinterface.signIn(authenticationRequest);
            try{
                ObjectMapper mapper = new ObjectMapper();
-               System.out.println(mapper.writeValueAsString(userDetails));
+               logger.info(mapper.writeValueAsString(userDetails));
            }catch (Exception e){
 
            }
@@ -128,8 +124,8 @@ public class FirstController {
     
     // USER SEARCH FOR TRIPS
       @PostMapping("/findtrips")
-      public ApiResponse<Trips> findTrips(@RequestBody Trips trip){
-      ApiResponse<Trips> u = new ApiResponse<>();
+      public ApiResponse<List<Trips>> findTrips(@RequestBody Trips trip){
+      ApiResponse<List<Trips>> u = new ApiResponse<>();
       u.setResponse(userinterface.findTrips(trip.getDeparture(),trip.getDestination(),trip.getDate()));
       u.setStatus(HttpStatus.OK);
       u.setMessage("Success");
@@ -203,7 +199,7 @@ public class FirstController {
       
       // UPLOAD MANIFEST FILE FOR INSURANCE COMPANY
      @PutMapping("/uploadFile")
-    public Response uploadFile(@RequestParam("file") MultipartFile file,@RequestParam String vehiclenumber) {
+    public Response uploadFile(@RequestParam("file") MultipartFile file,@RequestParam("vehiclenumber") String vehiclenumber) {
         String fileName = fileStorageService.storeFile(file);
 
         String filedownloaduri = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -213,9 +209,10 @@ public class FirstController {
 
 
          logger.info("fileDownloadUri " + filedownloaduri);
+         logger.info("vehicleNumber == " + vehiclenumber);
 
           int getFileUpdateCount = userinterface.saveFileUploadPathToDatabase(filedownloaduri, vehiclenumber);
-         System.out.println("getFileUpdateCount == " + getFileUpdateCount);
+         logger.info("getFileUpdateCount == " + getFileUpdateCount);
         return new Response(fileName, filedownloaduri,
                 file.getContentType(), file.getSize());
     }
@@ -254,7 +251,7 @@ public class FirstController {
 
 
     // UPDATE USER PASSWORD
-    @PostMapping("/updatepassword")
+    @PutMapping("/sendTokenToUpdatePassword")
     public ApiResponse<String> sendTokenToUpdatePassword(@RequestBody User user){
            ApiResponse<String> u = new ApiResponse<>();
            u.setResponse(userinterface.sendTokenToUpdatePassword(user.getPhonenumber()));
@@ -265,18 +262,24 @@ public class FirstController {
 
 
 
-
-
-// VERIFY TOKEN SENT TO PHONENUMBER AND CHANGE PASSWORD
-    @PutMapping("/changepassword")
+    @PostMapping("/verifyTokenForUpdatePassword")
     public ApiResponse<String> confirmTokenAndResetPassword(@RequestBody User user){
            ApiResponse<String> u = new ApiResponse<>();
-           u.setResponse(userinterface.changePassword(user.getPassword(),user.getPasswordupdatetoken(),user.getPhonenumber()));
+           u.setResponse(userinterface.confirmPasswordResetToken(user.getPasswordupdatetoken(),user.getPhonenumber()));
            u.setStatus(HttpStatus.OK);
            u.setMessage("success");
            return u;
     }
 
+
+    @PutMapping("/changepassword")
+    public ApiResponse<String> updateUserPassword(@RequestBody User user){
+           ApiResponse<String> u = new ApiResponse<>();
+           u.setResponse(userinterface.updatePassword(user.getPassword(),user.getPhonenumber()));
+           u.setStatus(HttpStatus.OK);
+           u.setMessage("success");
+           return u;
+    }
 
 
 
@@ -314,16 +317,6 @@ public class FirstController {
 
 
 
-//        @PostMapping("/verifyUserAuthenticationLogin")
-//        public ApiResponse<String> verifyUserAuthenticationLogin(@RequestBody User user){
-//                ApiResponse<String> u = new ApiResponse<>();
-//                u.setResponse(userinterface.verifyTokenForUserAuthentication(user.getToken(),user.getPhonenumber()));
-//                u.setStatus(HttpStatus.OK);
-//                u.setMessage("success");
-//                return u;
-//        }
-
-
 
         @PutMapping("/verifyUserOTP")
         public ApiResponse<String> otpVerification(@RequestBody User user){
@@ -334,5 +327,60 @@ public class FirstController {
             return u;
         }
 
+
+
+
+        @PostMapping("/getListOfUserBasedOnPrice")
+        public ApiResponse<List<Trips>> getListOfTripsBasedOnPrice(@RequestBody Trips trip){
+           ApiResponse<List<Trips>> u = new ApiResponse<>();
+           u.setResponse(userinterface.getListOfTripsBasedOnPriceInDescOrder(trip.getDeparture(),trip.getDestination(),trip.getDate()));
+            u.setStatus(HttpStatus.OK);
+            u.setMessage("success");
+            return u;
+        }
+
+
+        @PostMapping("/getFilteredListForUserSearch")
+        public ApiResponse<List<Trips>> getFilteredListForUserSearch(@RequestBody Trips trip){
+           ApiResponse<List<Trips>> a = new ApiResponse<>();
+           a.setResponse(userinterface.getAllTripsFilteredbyUser(trip.getPrice(),trip.getDeparturepark(),trip.getArrivalpark(),trip.getTime()));
+            a.setStatus(HttpStatus.OK);
+            a.setMessage("success");
+            return a;
+        }
+
+
+        @PostMapping("/getUserProfile")
+        public ApiResponse<User> getUserProfile(@RequestBody User user){
+            ApiResponse<User> u = new ApiResponse<>();
+            u.setResponse(userinterface.getUserProfile(user.getPhonenumber()));
+            u.setStatus(HttpStatus.OK);
+            u.setMessage("success");
+            return u;
+        }
+
+        // GET EXACT BUS FILE MANIFEST AND DOWNLOAD
+            @PostMapping("/getFileManifestToDownload")
+            public ApiResponse<String> getFileManifestToDownload(@RequestBody Trips trip){
+                ApiResponse<String> u = new ApiResponse<>();
+                u.setResponse(userinterface.getManifestFileToDownload(trip.getDeparture(),trip.getDestination(),
+                        trip.getDate(),trip.getVehiclenumber(),trip.getTransportcompany()));
+                u.setStatus(HttpStatus.OK);
+                u.setMessage("success");
+                return u;
+            }
+
+
+
+            // ADMIN TO DELETE USER
+                @DeleteMapping("/adminToDeleteUser/{id}")
+                public ApiResponse<Long> deleteUserForAdmin(@PathVariable long id){
+                    ApiResponse<Long> u = new ApiResponse<>();
+                    u.setResponse(userinterface.deleteMobileUserAccountByAdmin(id));
+                    u.setStatus(HttpStatus.OK);
+                    u.setMessage("success");
+                    return u;
+
+                }
 
 }

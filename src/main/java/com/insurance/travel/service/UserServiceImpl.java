@@ -5,21 +5,19 @@
  */
 package com.insurance.travel.service;
 
-
-import com.insurance.travel.controller.FirstController;
 import com.insurance.travel.model.TripBooking;
 import com.insurance.travel.model.Trips;
 import com.insurance.travel.model.User;
+import com.insurance.travel.repository.BusStationRepository;
 import com.insurance.travel.repository.TripBookingRepository;
 import com.insurance.travel.repository.TripsRepository;
 import com.insurance.travel.repository.UserRepository;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
-import com.twilio.rest.preview.accSecurity.service.Verification;
 import com.twilio.type.PhoneNumber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +25,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
  *
- * @author oreoluwa
+ * @author adedayo
  */
 @Configuration
 @EnableScheduling
@@ -54,6 +51,7 @@ public class UserServiceImpl implements UserInterface{
     @Qualifier("bCryptPasswordEncoder")
     private PasswordEncoder passwordencoder;
 
+
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     public static final String ACCOUNT_SID =
@@ -63,14 +61,14 @@ public class UserServiceImpl implements UserInterface{
 
 
     public void sendSmsMessage(String phonenumber,String body){
-        System.out.println("GOT TO TWILIO SERVICE TO SEND MESSAGE");
+        logger.info("GOT TO TWILIO SERVICE TO SEND MESSAGE");
                 Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
         Message message = Message
                 .creator(new PhoneNumber(phonenumber), // to
                         new PhoneNumber("+18177797043"), // from
                         body)
                 .create();
-        System.out.println("MESSAGE STATUS INFO FROM TWILIO = " + message);
+        logger.info("MESSAGE STATUS INFO FROM TWILIO = " + message);
     }
 
 
@@ -124,6 +122,18 @@ public class UserServiceImpl implements UserInterface{
     }
 
 
+    // GET USER PROFILE
+    @Override
+    public User getUserProfile(String phonenumber){
+        User user = repository.getUserProfile(phonenumber);
+        if(user == null){throw new RuntimeException("No user details");}
+        user.setPassword(null);
+        user.setOtpgenerationtime(null);
+        user.setToken(null);
+        user.setPasswordgentokentime(null);
+        user.setPasswordupdatetoken(null);
+        return  user;
+    }
 
 
     // VERIFY PHONE NUMBER TOKEN FOR USER AUTHENTICATION
@@ -135,16 +145,16 @@ public class UserServiceImpl implements UserInterface{
         }
         Date otpGenTime = getUserTokenDetails.getOtpgenerationtime();
         Date otpRetTime = new Date();
-        System.out.println("OTP GENERATION TIME================= + " + otpGenTime);
-        System.out.println("OTP REQUEST SENT TIME================= + " + otpRetTime);
+        logger.info("OTP GENERATION TIME================= + " + otpGenTime);
+        logger.info("OTP REQUEST SENT TIME================= + " + otpRetTime);
         long time1 = otpGenTime.getTime();
-        System.out.println(otpGenTime + " COVERTED TO MILLISECONDS == " + time1);
+        logger.info(otpGenTime + " COVERTED TO MILLISECONDS == " + time1);
         long time2 = otpRetTime.getTime();
-        System.out.println(otpRetTime + " COVERTED TO MILLISECONDS == " + time2);
-        long difference = time1 - time2;
-        System.out.println("TIME DIFFERENEC " + difference);
+        logger.info(otpRetTime + " COVERTED TO MILLISECONDS == " + time2);
+        long difference = time2 - time1;
+        logger.info("TIME DIFFERENEC " + difference);
 
-        if(difference < -1800000){
+        if(difference > 1800000){
             throw new RuntimeException("Sorry User token only valid for 30 minutes");
         }
         int updateUser = repository.authenticateUser(phonenumber);
@@ -201,9 +211,10 @@ public class UserServiceImpl implements UserInterface{
     
     // SERVICE FOR USER TO FIND TRIPS
     @Override
-    public Trips findTrips(String departure,String destination,String date){
-    Trips trip = tripsrepository.getTripsAvialable(departure,destination,date);
-    if(trip == null)
+    public List<Trips> findTrips(String departure,String destination,String date){
+    List<Trips> trip = tripsrepository.findByDepartureAndDestinationAndDate(departure,destination,date);
+        logger.info("TRIPS == " + trip);
+    if(trip.isEmpty())
         throw new RuntimeException("No trips avialable");
     return trip;
     }
@@ -223,7 +234,8 @@ public class UserServiceImpl implements UserInterface{
     trip.setPhonenumber(book.getPhonenumber());
     return tripbookrepo.save(trip);
     }
-    
+
+
     // SERVICE TO SAVE CREATED TRIPS FROM ADMIN
     @Override
     public Trips adminToCreateTripsForBooking(Trips trip){
@@ -238,6 +250,8 @@ public class UserServiceImpl implements UserInterface{
      trips.setVehicletype(trip.getVehicletype());
      trips.setTime(trip.getTime());
      trips.setDrivername(trip.getDrivername());
+     trips.setDeparturepark(trip.getDeparturepark());
+     trips.setArrivalpark(trip.getArrivalpark());
      return tripsrepository.save(trips);
     }
 
@@ -270,13 +284,20 @@ public class UserServiceImpl implements UserInterface{
     @Override
     public String sendTokenToUpdatePassword(String phonenumber) {
         String value = "Password token not sent";
+        User findPhonenumber = repository.findByPhonenumber(phonenumber);
+
+        if(findPhonenumber == null){
+            throw new RuntimeException("Phone number does not exist.");
+        }
+        Date passwordResetTokenTime = new Date();
+        logger.info("TIME GENERATION = " + passwordResetTokenTime);
         String phoneNumberVerificationToken = String.valueOf(Math.random()).substring(2, 6);
 
         // SEND SMS MESSAGE WITH TWILIO
         String body = "Please supply verification code " + phoneNumberVerificationToken + " to update password";
         sendSmsMessage(phonenumber,body);
 
-        int updatePassword = repository.uodatePasswordToken(phoneNumberVerificationToken,phonenumber);
+        int updatePassword = repository.uodatePasswordToken(phoneNumberVerificationToken,passwordResetTokenTime,phonenumber);
         if(updatePassword > 0){
             value = "TOKEN SENT TO PHONE NUMBER SUCCESSFULLY";
         }
@@ -286,15 +307,42 @@ public class UserServiceImpl implements UserInterface{
 
 
     @Override
-    public String changePassword(String password,String phoneNumberVerificationToken, String phonenumber){
+    public String updatePassword(String password,String phonenumber){
         String response = "FAILED";
-        String encryptpassword = passwordencoder.encode(password);
-        String verifyToken = repository.verifyPhonenumberToken(phonenumber);
-        if(verifyToken.contains(phoneNumberVerificationToken)){
-        int changePassword = repository.changePassword(encryptpassword,phoneNumberVerificationToken,phonenumber);
-        if(changePassword > 0) {
-            response = "Password changed successfully";
+        User user = repository.findByPhonenumber(phonenumber);
+        if (user == null){
+            throw new RuntimeException("No registered user with given phonenumber.");
         }
+        String encryptedpassword = passwordencoder.encode(password);
+        int changePassword = repository.changePassword(encryptedpassword,phonenumber);
+        if (changePassword > 0){
+            response = "Password change successfull";
+        }
+        return response;
+    }
+
+
+    @Override
+    public String confirmPasswordResetToken(String phoneNumberVerificationToken, String phonenumber){
+        User userDetails = repository.findByPasswordupdatetokenAndAndPhonenumber(phoneNumberVerificationToken,phonenumber);
+        logger.info("phonenumber = " + phonenumber);
+        logger.info("token = " + phoneNumberVerificationToken);
+        logger.info("userdetails = " + userDetails);
+        String response = "FAILED";
+        if (userDetails != null){
+        Date getTokenTimeFromDb = userDetails.getPasswordgentokentime();
+            logger.info("TOKEN TIME FROM DB = " + getTokenTimeFromDb);
+        long time1 = getTokenTimeFromDb.getTime();
+            logger.info("TIME 1 " + time1);
+        Date requestTime = new Date();
+        long time2 = requestTime.getTime();
+            logger.info("TIME2 = " + time2);
+        long difference = time2 - time1;
+            logger.info("TIME DIFFERENECE " + difference);
+            if(difference > 1800000){
+                throw new RuntimeException("Sorry User token only valid for 30 minutes");
+            }
+        response = "Password reset verification successful";
         } else {
             throw new RuntimeException("Wrong token details");
         }
@@ -305,7 +353,7 @@ public class UserServiceImpl implements UserInterface{
     @Override
     public int saveFileUploadPathToDatabase(String filedownloaduri,String vehiclenumber){
         int uploadFileToDatabaseWithBusNumber = tripsrepository.uploadManifestWithTripBus(filedownloaduri,vehiclenumber);
-        System.out.println("uploadFileToDatabaseWithBusNumber == " + uploadFileToDatabaseWithBusNumber);
+        logger.info("uploadFileToDatabaseWithBusNumber == " + uploadFileToDatabaseWithBusNumber);
             return uploadFileToDatabaseWithBusNumber;
     }
 
@@ -345,10 +393,42 @@ public class UserServiceImpl implements UserInterface{
            return getAllUserForAdmin;
     }
 
+    @Override
+    public List<Trips> getListOfTripsBasedOnPriceInDescOrder(String departure,String destination,String date){
+        List<Trips> getList = tripsrepository.findAllByDepartureAndDestinationAndDateOrderByPriceDesc(departure,destination,date);
+        if(getList.isEmpty()){
+            throw new RuntimeException("No trips found");
+        }
+        return getList;
+
+    }
+
+
+    @Override
+    public List<Trips> getAllTripsFilteredbyUser(BigDecimal price,String departurepark,String arrivalpark,String time){
+        List<Trips> getAllFilteredTrips = tripsrepository.getAllFilteredTrips(price,departurepark,arrivalpark,time);
+        if(getAllFilteredTrips.isEmpty()){
+            throw new RuntimeException("No trips available");
+        }
+        return getAllFilteredTrips;
+    }
 
 
 
+    @Override
+    public String getManifestFileToDownload(String departure,String destination,String date,String vehiclenumber,String transportcompany){
+        String getFileDownloadUri = tripsrepository.getTripFileManifestToDownload(departure,destination,date,vehiclenumber,transportcompany);
+        if(getFileDownloadUri == null){throw new RuntimeException("No trips found");}
+        return getFileDownloadUri;
+    }
 
-
+    // ADMIN TO DELETE USER
+    @Override
+    public long deleteMobileUserAccountByAdmin(long id){
+        long deleteUser = repository.deleteById(id);
+        logger.info("delete User = " + deleteUser);
+        if(deleteUser == 0){throw new RuntimeException("No user deleted");}
+        return deleteUser;
+    }
 
 }

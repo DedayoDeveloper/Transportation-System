@@ -27,8 +27,6 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     @ResponseBody
     public ApiResponse<User> springHandleNotFound(HttpServletResponse response, Exception ex) throws IOException {
         ApiResponse<User> error = new ApiResponse<>();
-        User user = new User();
-        error.setResponse(user);
         error.setStatus(HttpStatus.NOT_FOUND);
         error.setError("Error Found");
         error.setMessage(ex.getMessage());

@@ -5,13 +5,9 @@
  */
 package com.insurance.travel.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.Date;
@@ -32,9 +28,10 @@ public class User {
     @Column(name = "fullname", nullable = false)
     private String fullname;
 
-    @Column(name = "otpgenerationtime", nullable = false)
-    private Date otpgenerationtime;
 
+    @Column(name = "otpgenerationtime", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date otpgenerationtime;
 
 
     @Column(name = "phonenumber", nullable = false)
@@ -42,6 +39,7 @@ public class User {
 
     @Column(name = "email", nullable = true)
     private String email;
+
 
     @Column(name = "password", nullable = false)
     private String password;
@@ -58,14 +56,34 @@ public class User {
     @Column(name = "kinaddress", nullable = true)
     private String kinaddress;
 
+
     @Column(name = "passwordupdatetoken", nullable = true)
     private String passwordupdatetoken;
+
 
     @Column(name = "enabled" , nullable = false)
     private int enabled;
 
     @Column(name = "role", nullable = true)
     private String role;
+
+
+    @Column(name = "passwordgentokentime", nullable = true)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date passwordgentokentime;
+
+
+    @Column(name = "token", nullable = true)
+    private String token;
+
+
+    public Date getPasswordgentokentime() {
+        return passwordgentokentime;
+    }
+
+    public void setPasswordgentokentime(Date passwordgentokentime) {
+        this.passwordgentokentime = passwordgentokentime;
+    }
 
     public Date getOtpgenerationtime() {
         return otpgenerationtime;
@@ -82,10 +100,6 @@ public class User {
     public void setEnabled(int enabled) {
         this.enabled = enabled;
     }
-
-    @Column(name = "token", nullable = true)
-    private String token;
-
 
     public String getToken() {
         return token;

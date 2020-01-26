@@ -8,28 +8,36 @@ package com.insurance.travel.service;
 import com.insurance.travel.model.TripBooking;
 import com.insurance.travel.model.Trips;
 import com.insurance.travel.model.User;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
  *
- * @author oreoluwa
+ * @author adedayo
  */
 public interface UserInterface {
     
     public User registerUser(User createuser);
    public User signIn(User userDetails);
    public String updateUserNextOfKin(String kinname,String kinphonenumber, String kinemail,String kinaddress,String phonenumber);
-   public Trips findTrips(String departure,String destination,String date);
+   public List<Trips> findTrips(String departure,String destination,String date);
    public TripBooking bookTrips(TripBooking book);
     public Trips adminToCreateTripsForBooking(Trips trip);
     public TripBooking searchPassengerOnTrip(TripBooking trip);
     public List<TripBooking> getAllPassengersOnATrip(TripBooking searchTrip);
     public String sendTokenToUpdatePassword(String phonenumber);
     public int saveFileUploadPathToDatabase(String fileDownloadUri,String vehiclenumber);
-    public String changePassword(String password,String phoneNumberVerificationToken, String phonenumber);
+    public String confirmPasswordResetToken(String phoneNumberVerificationToken, String phonenumber);
     public int getTotalAmountOfRegisteredUsers();
     public User createBusStationAdmin(User userAdmin);
 //    public int getAllUsers();
+public String updatePassword(String password,String phonenumber);
     public List<User> getListOfAllUsers();
     public String verifyTokenForUserAuthentication(String token,String phonenumber);
+    public List<Trips> getListOfTripsBasedOnPriceInDescOrder(String departure,String destination,String date);
+    public List<Trips> getAllTripsFilteredbyUser(BigDecimal price, String departurepark, String arrivalpark, String time);
+    public User getUserProfile(String phonenumber);
+    public String getManifestFileToDownload(String departure,String destination,String date,String vehiclenumber,String transportcompany);
+    public long deleteMobileUserAccountByAdmin(long id);
 }

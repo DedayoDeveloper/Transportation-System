@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -24,18 +25,30 @@ import java.util.Date;
 public interface UserRepository extends JpaRepository<User , Long>{
     
     User findByPhonenumber(String phonenumber);
+
     User findByEmail(String email);
 
+    User findByPhonenumberAndAndToken(String phonenumber, String token);
+
+    User findByPasswordupdatetokenAndAndPhonenumber(String passwordgentokentime , String phonenumber);
+
+    long deleteById(long id);
+
+
+
+    @Query("select u from User u where u.phonenumber = :phonenumber")
+    User getUserProfile(@Param("phonenumber") String phonenumber);
+
     @Modifying
     @Transactional
-    @Query("update User u set u.passwordupdatetoken = :passwordupdatetoken where u.phonenumber = :phonenumber")
-    int uodatePasswordToken(@Param("passwordupdatetoken") String passwordupdatetoken, @Param("phonenumber") String phonenumber);
+    @Query("update User u set u.passwordupdatetoken = :passwordupdatetoken, u.passwordgentokentime = :passwordgentokentime where u.phonenumber = :phonenumber")
+    int uodatePasswordToken(@Param("passwordupdatetoken") String passwordupdatetoken,@Param("passwordgentokentime") Date passwordgentokentime,@Param("phonenumber") String phonenumber);
 
 
     @Modifying
     @Transactional
-    @Query("update User u set u.password = :password where u.passwordupdatetoken = :passwordupdatetoken and u.phonenumber = :phonenumber")
-    int changePassword (@Param("password") String password,@Param("passwordupdatetoken") String passwordupdatetoken,@Param("phonenumber") String phonenumber);
+    @Query("update User u set u.password = :password where u.phonenumber = :phonenumber")
+    int changePassword (@Param("password") String password,@Param("phonenumber") String phonenumber);
 
     @Query("select u.passwordupdatetoken from User u where u.phonenumber = :phonenumber")
     String verifyPhonenumberToken(@Param("phonenumber") String phonenumber);
@@ -50,7 +63,7 @@ public interface UserRepository extends JpaRepository<User , Long>{
     @Query("select u.enabled from User u where u.phonenumber = :phonenumber")
     String getUserAuthorization(@Param("phonenumber") String phonenumber);
 
-    User findByPhonenumberAndAndToken(String phonenumber, String token);
+
 
     @Transactional
     @Modifying
