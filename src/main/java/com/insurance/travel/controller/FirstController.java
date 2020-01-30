@@ -377,4 +377,13 @@ public class FirstController {
                 }
 
 
+                @PostMapping("/orderTripsBasedonPriceInAscendingOrder")
+                public ApiResponse<List<Trips>> getTripsBasedOnPriceInAscendingOrder(@RequestBody Trips trip){
+                    ApiResponse<List<Trips>> u = new ApiResponse<>();
+                    u.setResponse(userinterface.getListOfTripsBasedOnPriceInAscendingOrder(trip.getDeparture(),trip.getDestination(),trip.getDate()));
+                    u.setStatus(HttpStatus.OK);
+                    u.setMessage("success");
+                    return u;
+                }
+
 }

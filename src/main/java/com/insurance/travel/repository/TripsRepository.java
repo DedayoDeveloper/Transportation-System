@@ -36,6 +36,8 @@ public interface TripsRepository extends JpaRepository<Trips, Long>{
 
     List<Trips> findAllByDepartureAndDestinationAndDateOrderByPriceDesc(String departure, String destination, String date);
 
+    List<Trips> findAllByDepartureAndDestinationAndDateOrderByPriceAsc(String departure, String destination, String date);
+
     @Query("select t from Trips t where t.price <= :price and t.departurepark = :departurepark and t.arrivalpark = :arrivalpark and t.time = :time")
     List<Trips> getAllFilteredTrips(@Param("price")BigDecimal price,@Param("departurepark") String departurepark, @Param("arrivalpark") String arrivalpark,@Param("time") String time);
 

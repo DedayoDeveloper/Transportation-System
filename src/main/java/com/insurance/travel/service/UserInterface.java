@@ -40,4 +40,5 @@ public String updatePassword(String password,String phonenumber);
     public User getUserProfile(String phonenumber);
     public String getManifestFileToDownload(String departure,String destination,String date,String vehiclenumber,String transportcompany);
     public long deleteMobileUserAccountByAdmin(long id);
+    public List<Trips> getListOfTripsBasedOnPriceInAscendingOrder(String departure,String destination,String date);
 }

@@ -403,6 +403,15 @@ public class UserServiceImpl implements UserInterface{
 
     }
 
+    @Override
+    public List<Trips> getListOfTripsBasedOnPriceInAscendingOrder(String departure,String destination,String date){
+        List<Trips> getList = tripsrepository.findAllByDepartureAndDestinationAndDateOrderByPriceAsc(departure,destination,date);
+        if(getList.isEmpty()){
+            throw new RuntimeException("No trips found");
+        }
+        return getList;
+    }
+
 
     @Override
     public List<Trips> getAllTripsFilteredbyUser(BigDecimal price,String departurepark,String arrivalpark,String time){
