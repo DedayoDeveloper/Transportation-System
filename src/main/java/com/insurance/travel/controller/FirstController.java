@@ -132,7 +132,6 @@ public class FirstController {
       return u;
       }
 
-
       
       // USER BOOK A TRIP
       @PostMapping("/booktrips")
@@ -145,7 +144,6 @@ public class FirstController {
       }
 
 
-
       // ADMIN TO DELETE A USER
       @DeleteMapping("/deleteuser")
       public ApiResponse<String> deleteUser(@RequestBody User user){
@@ -156,9 +154,6 @@ public class FirstController {
       u.setResponse("User deleted successfully");
       return u;
       }
-
-
-
       
     // ADMIN TO CREATE TRIPS FOR USERS TO BOOK FROM
       @PostMapping("/createtrips")
@@ -371,7 +366,6 @@ public class FirstController {
             }
 
 
-
             // ADMIN TO DELETE USER
                 @DeleteMapping("/adminToDeleteUser/{id}")
                 public ApiResponse<Long> deleteUserForAdmin(@PathVariable long id){
@@ -380,7 +374,7 @@ public class FirstController {
                     u.setStatus(HttpStatus.OK);
                     u.setMessage("success");
                     return u;
-
                 }
+
 
 }

@@ -59,8 +59,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
         http.cors();
     }
 
-
-
     @Configuration
     public class WebConfiguration implements WebMvcConfigurer {
 

@@ -58,8 +58,5 @@ public class Response {
     public void setSize(long size) {
         this.size = size;
     }
-    
-    
-    
-    
+
 }
