@@ -5,10 +5,13 @@
  */
 package com.insurance.travel.service;
 
+import com.insurance.travel.TrackTime;
+import com.insurance.travel.model.CoRiders;
 import com.insurance.travel.model.TripBooking;
 import com.insurance.travel.model.Trips;
 import com.insurance.travel.model.User;
-import com.insurance.travel.repository.BusStationRepository;
+
+import com.insurance.travel.repository.CoRiderRepository;
 import com.insurance.travel.repository.TripBookingRepository;
 import com.insurance.travel.repository.TripsRepository;
 import com.insurance.travel.repository.UserRepository;
@@ -46,6 +49,9 @@ public class UserServiceImpl implements UserInterface{
     
     @Autowired
     private TripBookingRepository tripbookrepo;
+
+    @Autowired
+    private CoRiderRepository coRiders;
   
     @Autowired
     @Qualifier("bCryptPasswordEncoder")
@@ -76,6 +82,7 @@ public class UserServiceImpl implements UserInterface{
     
     // SERVICE TO REGISTER NEW USER
     @Override
+    @TrackTime
     public User registerUser(User createuser){
     User user = new User();
         String otp = String.valueOf(Math.random()).substring(2, 6);
@@ -124,6 +131,7 @@ public class UserServiceImpl implements UserInterface{
 
     // GET USER PROFILE
     @Override
+    @TrackTime
     public User getUserProfile(String phonenumber){
         User user = repository.getUserProfile(phonenumber);
         if(user == null){throw new RuntimeException("No user details");}
@@ -138,6 +146,7 @@ public class UserServiceImpl implements UserInterface{
 
     // VERIFY PHONE NUMBER TOKEN FOR USER AUTHENTICATION
     @Override
+    @TrackTime
     public String verifyTokenForUserAuthentication(String token,String phonenumber){
         User getUserTokenDetails = repository.findByPhonenumberAndAndToken(phonenumber,token);
         if (getUserTokenDetails == null){
@@ -167,6 +176,7 @@ public class UserServiceImpl implements UserInterface{
 
     // USER SIGN IN WITH PHONE-NUMBER AND PASSWORD
     @Override
+    @TrackTime
     public User signIn(User userDetails){
     User user = repository.findByPhonenumber(userDetails.getPhonenumber());
     if (user == null){ throw new RuntimeException("Invalid user details"); }
@@ -186,6 +196,7 @@ public class UserServiceImpl implements UserInterface{
     
     // UPDATE USER NEXT OF KIN DETAILS
     @Override
+    @TrackTime
     public String updateUserNextOfKin(String kinname,String kinphonenumber, String kinemail,String kinaddress,String phonenumber){
         User user = repository.findByPhonenumber(phonenumber);
         
@@ -210,10 +221,10 @@ public class UserServiceImpl implements UserInterface{
     
     
     // SERVICE FOR USER TO FIND TRIPS
+    @TrackTime
     @Override
     public List<Trips> findTrips(String departure,String destination,String date){
     List<Trips> trip = tripsrepository.findByDepartureAndDestinationAndDate(departure,destination,date);
-        logger.info("TRIPS == " + trip);
     if(trip.isEmpty())
         throw new RuntimeException("No trips avialable");
     return trip;
@@ -223,6 +234,7 @@ public class UserServiceImpl implements UserInterface{
     
     // SERVICE FOR USER TO BOOK TRIPS
     @Override
+    @TrackTime
     public TripBooking bookTrips(TripBooking book){
     TripBooking trip = new TripBooking();
     trip.setBoarding(book.getBoarding());
@@ -238,6 +250,7 @@ public class UserServiceImpl implements UserInterface{
 
     // SERVICE TO SAVE CREATED TRIPS FROM ADMIN
     @Override
+    @TrackTime
     public Trips adminToCreateTripsForBooking(Trips trip){
      Trips trips = new Trips();
      trips.setTransportcompany(trip.getTransportcompany());
@@ -259,6 +272,7 @@ public class UserServiceImpl implements UserInterface{
 
     // SEARCH FOR PASSENGER USING PHONENUMBER
     @Override
+    @TrackTime
     public TripBooking searchPassengerOnTrip(TripBooking search) {
         TripBooking searchedPassenger = tripbookrepo.getPassengerRegisteredForTrip(search.getPhonenumber());
         if (searchedPassenger == null) {
@@ -271,6 +285,7 @@ public class UserServiceImpl implements UserInterface{
 
  
     @Override
+    @TrackTime
     public List<TripBooking> getAllPassengersOnATrip(TripBooking searchTrip){
         List<TripBooking> getAllPassengers = tripbookrepo.getAllPassengersOnATrip(searchTrip.getBoarding(), searchTrip.getDestination());
         if(getAllPassengers == null){
@@ -282,6 +297,7 @@ public class UserServiceImpl implements UserInterface{
 
 
     @Override
+    @TrackTime
     public String sendTokenToUpdatePassword(String phonenumber) {
         String value = "Password token not sent";
         User findPhonenumber = repository.findByPhonenumber(phonenumber);
@@ -290,7 +306,7 @@ public class UserServiceImpl implements UserInterface{
             throw new RuntimeException("Phone number does not exist.");
         }
         Date passwordResetTokenTime = new Date();
-        logger.info("TIME GENERATION = " + passwordResetTokenTime);
+        logger.info("PasswordResetToken Generation Time = " + passwordResetTokenTime);
         String phoneNumberVerificationToken = String.valueOf(Math.random()).substring(2, 6);
 
         // SEND SMS MESSAGE WITH TWILIO
@@ -307,6 +323,7 @@ public class UserServiceImpl implements UserInterface{
 
 
     @Override
+    @TrackTime
     public String updatePassword(String password,String phonenumber){
         String response = "FAILED";
         User user = repository.findByPhonenumber(phonenumber);
@@ -323,15 +340,13 @@ public class UserServiceImpl implements UserInterface{
 
 
     @Override
+    @TrackTime
     public String confirmPasswordResetToken(String phoneNumberVerificationToken, String phonenumber){
         User userDetails = repository.findByPasswordupdatetokenAndAndPhonenumber(phoneNumberVerificationToken,phonenumber);
-        logger.info("phonenumber = " + phonenumber);
-        logger.info("token = " + phoneNumberVerificationToken);
-        logger.info("userdetails = " + userDetails);
         String response = "FAILED";
         if (userDetails != null){
         Date getTokenTimeFromDb = userDetails.getPasswordgentokentime();
-            logger.info("TOKEN TIME FROM DB = " + getTokenTimeFromDb);
+//            logger.info("TOKEN TIME FROM DB = " + getTokenTimeFromDb);
         long time1 = getTokenTimeFromDb.getTime();
             logger.info("TIME 1 " + time1);
         Date requestTime = new Date();
@@ -351,15 +366,16 @@ public class UserServiceImpl implements UserInterface{
 
 
     @Override
+    @TrackTime
     public int saveFileUploadPathToDatabase(String filedownloaduri,String vehiclenumber){
         int uploadFileToDatabaseWithBusNumber = tripsrepository.uploadManifestWithTripBus(filedownloaduri,vehiclenumber);
-        logger.info("uploadFileToDatabaseWithBusNumber == " + uploadFileToDatabaseWithBusNumber);
             return uploadFileToDatabaseWithBusNumber;
     }
 
 
         // GET TOTAL AMOUNT OF REGISTERED USERS ON THIS PLATFORM
       @Override
+      @TrackTime
     public int getTotalAmountOfRegisteredUsers(){
           List<User> getAllUserForAdmin = repository.findAll();
           int userSize = getAllUserForAdmin.size();
@@ -369,6 +385,7 @@ public class UserServiceImpl implements UserInterface{
 
 
        @Override
+       @TrackTime
        public User createBusStationAdmin(User userAdmin){
         String role = "ROLE_BUSADMIN";
          User user = new User();
@@ -388,12 +405,14 @@ public class UserServiceImpl implements UserInterface{
 
 
         @Override
+        @TrackTime
         public List<User> getListOfAllUsers(){
            List<User> getAllUserForAdmin = repository.findAll();
            return getAllUserForAdmin;
     }
 
     @Override
+    @TrackTime
     public List<Trips> getListOfTripsBasedOnPriceInDescOrder(String departure,String destination,String date){
         List<Trips> getList = tripsrepository.findAllByDepartureAndDestinationAndDateOrderByPriceDesc(departure,destination,date);
         if(getList.isEmpty()){
@@ -404,6 +423,7 @@ public class UserServiceImpl implements UserInterface{
     }
 
     @Override
+    @TrackTime
     public List<Trips> getListOfTripsBasedOnPriceInAscendingOrder(String departure,String destination,String date){
         List<Trips> getList = tripsrepository.findAllByDepartureAndDestinationAndDateOrderByPriceAsc(departure,destination,date);
         if(getList.isEmpty()){
@@ -414,8 +434,9 @@ public class UserServiceImpl implements UserInterface{
 
 
     @Override
-    public List<Trips> getAllTripsFilteredbyUser(BigDecimal price,String departurepark,String arrivalpark,String time){
-        List<Trips> getAllFilteredTrips = tripsrepository.getAllFilteredTrips(price,departurepark,arrivalpark,time);
+    @TrackTime
+    public List<Trips> getAllTripsFilteredbyUser(BigDecimal price,String departure,String destination){
+        List<Trips> getAllFilteredTrips = tripsrepository.getAllFilteredTrips(price,departure,destination);
         if(getAllFilteredTrips.isEmpty()){
             throw new RuntimeException("No trips available");
         }
@@ -425,6 +446,7 @@ public class UserServiceImpl implements UserInterface{
 
 
     @Override
+    @TrackTime
     public String getManifestFileToDownload(String departure,String destination,String date,String vehiclenumber,String transportcompany){
         String getFileDownloadUri = tripsrepository.getTripFileManifestToDownload(departure,destination,date,vehiclenumber,transportcompany);
         if(getFileDownloadUri == null){throw new RuntimeException("No trips found");}
@@ -433,11 +455,49 @@ public class UserServiceImpl implements UserInterface{
 
     // ADMIN TO DELETE USER
     @Override
+    @TrackTime
     public long deleteMobileUserAccountByAdmin(long id){
         long deleteUser = repository.deleteById(id);
-        logger.info("delete User = " + deleteUser);
         if(deleteUser == 0){throw new RuntimeException("No user deleted");}
         return deleteUser;
     }
+
+    @Override
+    @TrackTime
+    public Trips getTripDetailsUsingId(long id){
+        Trips getTripDetails = tripsrepository.findById(id);
+        if (getTripDetails == null){
+            throw new RuntimeException("No Trips Found");
+        }
+        return getTripDetails;
+    }
+
+
+    @Override
+    @TrackTime
+    public String registerCoRiders(String[] coRiderName, String[] coRiderPhoneNumber,String phonenumber,int numberOfRiders){
+        User checkUser = repository.findByPhonenumber(phonenumber);
+
+
+
+        if(checkUser == null){
+            throw new RuntimeException("No User Found");
+        }
+
+        coRiderName = new String[numberOfRiders];
+        coRiderPhoneNumber = new String[numberOfRiders];
+
+        for (int i = 1; i <= numberOfRiders; i++) {
+            CoRiders riders = new CoRiders();
+            riders.setRidername(coRiderName);
+            riders.setPhonenumber(phonenumber);
+            riders.setRiderphonenumber(coRiderPhoneNumber);
+            coRiders.save(riders);
+        }
+
+        return "Succesfully Saved";
+    }
+
+
 
 }

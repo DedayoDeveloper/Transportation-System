@@ -67,6 +67,7 @@ public class Trips {
 //    @Column(name = "station", nullable = true)
 //    private String station;
 
+
     @Column(name = "departurepark", nullable = true)
     private String departurepark;
 
@@ -194,9 +195,6 @@ public class Trips {
     public void setTransportcompany(String transportcompany) {
         this.transportcompany = transportcompany;
     }
-    
-    
-    
-    
-    
+
+
 }

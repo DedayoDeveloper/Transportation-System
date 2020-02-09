@@ -9,6 +9,10 @@ import com.insurance.travel.model.TripBooking;
 import com.insurance.travel.model.Trips;
 import com.insurance.travel.model.User;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -16,6 +20,7 @@ import java.util.List;
  *
  * @author adedayo
  */
+
 public interface UserInterface {
     
     public User registerUser(User createuser);
@@ -36,9 +41,11 @@ public String updatePassword(String password,String phonenumber);
     public List<User> getListOfAllUsers();
     public String verifyTokenForUserAuthentication(String token,String phonenumber);
     public List<Trips> getListOfTripsBasedOnPriceInDescOrder(String departure,String destination,String date);
-    public List<Trips> getAllTripsFilteredbyUser(BigDecimal price, String departurepark, String arrivalpark, String time);
+    public List<Trips> getAllTripsFilteredbyUser(BigDecimal price,String departure,String destination);
     public User getUserProfile(String phonenumber);
     public String getManifestFileToDownload(String departure,String destination,String date,String vehiclenumber,String transportcompany);
     public long deleteMobileUserAccountByAdmin(long id);
     public List<Trips> getListOfTripsBasedOnPriceInAscendingOrder(String departure,String destination,String date);
+    public Trips getTripDetailsUsingId(long id);
+    public String registerCoRiders(String[] coRiderName, String[] coRiderPhoneNumber,String phonenumber,int numberOfRiders);
 }

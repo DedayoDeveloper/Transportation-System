@@ -8,10 +8,7 @@ package com.insurance.travel.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.insurance.travel.fileupload.FileStorageService;
 import com.insurance.travel.fileupload.Response;
-import com.insurance.travel.model.AuthenticationResponse;
-import com.insurance.travel.model.TripBooking;
-import com.insurance.travel.model.Trips;
-import com.insurance.travel.model.User;
+import com.insurance.travel.model.*;
 import com.insurance.travel.repository.UserRepository;
 import com.insurance.travel.response.ApiResponse;
 import com.insurance.travel.service.UserInterface;
@@ -21,6 +18,7 @@ import com.insurance.travel.tokenConfig.JwtUtil;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +55,7 @@ public class FirstController {
     private JwtUtil jwttokenutil;
     
     @Autowired
-    private UserInterface userinterface;
+    private UserInterface userInterface;
     
     @Autowired
     private UserRepository repository;
@@ -85,7 +83,7 @@ public class FirstController {
            if (userDetails == null) {
                throw new RuntimeException("User does not exist.");
            }
-          User user = userinterface.signIn(authenticationRequest);
+          User user = userInterface.signIn(authenticationRequest);
            try{
                ObjectMapper mapper = new ObjectMapper();
                logger.info(mapper.writeValueAsString(userDetails));
@@ -102,7 +100,7 @@ public class FirstController {
     @PostMapping("/registeruser")
     public ApiResponse<User> registerUser(@RequestBody User user){
     ApiResponse<User> u = new ApiResponse<>();
-    u.setResponse(userinterface.registerUser(user));
+    u.setResponse(userInterface.registerUser(user));
     u.setMessage("Success");
     u.setStatus(HttpStatus.CREATED);
     return u;
@@ -115,7 +113,7 @@ public class FirstController {
     @PutMapping("/updateprofile")
     public ApiResponse<String> updateUserProfile(@RequestBody User user){
     ApiResponse<String> u = new ApiResponse<>();
-    u.setResponse(userinterface.updateUserNextOfKin(user.getKinname(),user.getKinphonenumber(),user.getKinemail(),user.getKinaddress(),user.getPhonenumber()));
+    u.setResponse(userInterface.updateUserNextOfKin(user.getKinname(),user.getKinphonenumber(),user.getKinemail(),user.getKinaddress(),user.getPhonenumber()));
     u.setStatus(HttpStatus.OK);
     u.setMessage("Success");
     return u;
@@ -126,7 +124,7 @@ public class FirstController {
       @PostMapping("/findtrips")
       public ApiResponse<List<Trips>> findTrips(@RequestBody Trips trip){
       ApiResponse<List<Trips>> u = new ApiResponse<>();
-      u.setResponse(userinterface.findTrips(trip.getDeparture(),trip.getDestination(),trip.getDate()));
+      u.setResponse(userInterface.findTrips(trip.getDeparture(),trip.getDestination(),trip.getDate()));
       u.setStatus(HttpStatus.OK);
       u.setMessage("Success");
       return u;
@@ -137,7 +135,7 @@ public class FirstController {
       @PostMapping("/booktrips")
       public ApiResponse<TripBooking> bookTrips(@RequestBody TripBooking trip){
       ApiResponse<TripBooking> u = new ApiResponse<>();
-      u.setResponse(userinterface.bookTrips(trip));
+      u.setResponse(userInterface.bookTrips(trip));
       u.setStatus(HttpStatus.OK);
       u.setMessage("Success");
       return u;
@@ -159,7 +157,7 @@ public class FirstController {
       @PostMapping("/createtrips")
       public ApiResponse<Trips> adminCreateTripsForUsers(@RequestBody Trips trip){
       ApiResponse<Trips> u = new ApiResponse<>();
-      u.setResponse(userinterface.adminToCreateTripsForBooking(trip));
+      u.setResponse(userInterface.adminToCreateTripsForBooking(trip));
       u.setStatus(HttpStatus.OK);
       u.setMessage("success");
       return u;
@@ -172,7 +170,7 @@ public class FirstController {
       @PostMapping("/searchpassenger")
       public ApiResponse<TripBooking> searchPassengerOnTripBus(@RequestBody TripBooking search){
       ApiResponse<TripBooking> u = new ApiResponse<>();
-      u.setResponse(userinterface.searchPassengerOnTrip(search));
+      u.setResponse(userInterface.searchPassengerOnTrip(search));
       u.setStatus(HttpStatus.OK);
       u.setMessage("success");
       return u;
@@ -184,7 +182,7 @@ public class FirstController {
       @PostMapping("/getallpassengersontrip")
       public ApiResponse<List<TripBooking>> getAllPassengersOnATripBus(@RequestBody TripBooking passengers){
       ApiResponse<List<TripBooking>> u = new ApiResponse<>();
-       u.setResponse(userinterface.getAllPassengersOnATrip(passengers));
+       u.setResponse(userInterface.getAllPassengersOnATrip(passengers));
        u.setStatus(HttpStatus.OK);
        u.setMessage("success");
        return u;
@@ -206,7 +204,7 @@ public class FirstController {
          logger.info("fileDownloadUri " + filedownloaduri);
          logger.info("vehicleNumber == " + vehiclenumber);
 
-          int getFileUpdateCount = userinterface.saveFileUploadPathToDatabase(filedownloaduri, vehiclenumber);
+          int getFileUpdateCount = userInterface.saveFileUploadPathToDatabase(filedownloaduri, vehiclenumber);
          logger.info("getFileUpdateCount == " + getFileUpdateCount);
         return new Response(fileName, filedownloaduri,
                 file.getContentType(), file.getSize());
@@ -249,7 +247,7 @@ public class FirstController {
     @PutMapping("/sendTokenToUpdatePassword")
     public ApiResponse<String> sendTokenToUpdatePassword(@RequestBody User user){
            ApiResponse<String> u = new ApiResponse<>();
-           u.setResponse(userinterface.sendTokenToUpdatePassword(user.getPhonenumber()));
+           u.setResponse(userInterface.sendTokenToUpdatePassword(user.getPhonenumber()));
            u.setStatus(HttpStatus.OK);
            u.setMessage("success");
            return u;
@@ -260,7 +258,7 @@ public class FirstController {
     @PostMapping("/verifyTokenForUpdatePassword")
     public ApiResponse<String> confirmTokenAndResetPassword(@RequestBody User user){
            ApiResponse<String> u = new ApiResponse<>();
-           u.setResponse(userinterface.confirmPasswordResetToken(user.getPasswordupdatetoken(),user.getPhonenumber()));
+           u.setResponse(userInterface.confirmPasswordResetToken(user.getPasswordupdatetoken(),user.getPhonenumber()));
            u.setStatus(HttpStatus.OK);
            u.setMessage("success");
            return u;
@@ -270,7 +268,7 @@ public class FirstController {
     @PutMapping("/changepassword")
     public ApiResponse<String> updateUserPassword(@RequestBody User user){
            ApiResponse<String> u = new ApiResponse<>();
-           u.setResponse(userinterface.updatePassword(user.getPassword(),user.getPhonenumber()));
+           u.setResponse(userInterface.updatePassword(user.getPassword(),user.getPhonenumber()));
            u.setStatus(HttpStatus.OK);
            u.setMessage("success");
            return u;
@@ -282,7 +280,7 @@ public class FirstController {
     @GetMapping("/getTotalUsers")
     public ApiResponse<Integer> getTotalUsersOnPlatform(){
            ApiResponse<Integer> u = new ApiResponse<>();
-           u.setResponse(userinterface.getTotalAmountOfRegisteredUsers());
+           u.setResponse(userInterface.getTotalAmountOfRegisteredUsers());
            u.setStatus(HttpStatus.OK);
            u.setMessage("success");
            return u;
@@ -293,7 +291,7 @@ public class FirstController {
     @PostMapping("/createBusStationAdmin")
     public ApiResponse<User> createBusStationAdmin(@RequestBody User user){
            ApiResponse<User> u = new ApiResponse<>();
-           u.setResponse(userinterface.createBusStationAdmin(user));
+           u.setResponse(userInterface.createBusStationAdmin(user));
            u.setStatus(HttpStatus.OK);
            u.setMessage("success");
            return u;
@@ -304,7 +302,7 @@ public class FirstController {
     @GetMapping("/getListOfAllUser")
     public ApiResponse<List<User>> getListOfAllUsers(){
            ApiResponse<List<User>> u = new ApiResponse<>();
-           u.setResponse(userinterface.getListOfAllUsers());
+           u.setResponse(userInterface.getListOfAllUsers());
            u.setStatus(HttpStatus.OK);
            u.setMessage("success");
         return u;
@@ -316,7 +314,7 @@ public class FirstController {
         @PutMapping("/verifyUserOTP")
         public ApiResponse<String> otpVerification(@RequestBody User user){
             ApiResponse<String> u = new ApiResponse<>();
-            u.setResponse(userinterface.verifyTokenForUserAuthentication(user.getToken(),user.getPhonenumber()));
+            u.setResponse(userInterface.verifyTokenForUserAuthentication(user.getToken(),user.getPhonenumber()));
             u.setStatus(HttpStatus.OK);
             u.setMessage("success");
             return u;
@@ -328,7 +326,7 @@ public class FirstController {
         @PostMapping("/getListOfUserBasedOnPrice")
         public ApiResponse<List<Trips>> getListOfTripsBasedOnPrice(@RequestBody Trips trip){
            ApiResponse<List<Trips>> u = new ApiResponse<>();
-           u.setResponse(userinterface.getListOfTripsBasedOnPriceInDescOrder(trip.getDeparture(),trip.getDestination(),trip.getDate()));
+           u.setResponse(userInterface.getListOfTripsBasedOnPriceInDescOrder(trip.getDeparture(),trip.getDestination(),trip.getDate()));
             u.setStatus(HttpStatus.OK);
             u.setMessage("success");
             return u;
@@ -338,7 +336,7 @@ public class FirstController {
         @PostMapping("/getFilteredListForUserSearch")
         public ApiResponse<List<Trips>> getFilteredListForUserSearch(@RequestBody Trips trip){
            ApiResponse<List<Trips>> a = new ApiResponse<>();
-           a.setResponse(userinterface.getAllTripsFilteredbyUser(trip.getPrice(),trip.getDeparturepark(),trip.getArrivalpark(),trip.getTime()));
+           a.setResponse(userInterface.getAllTripsFilteredbyUser(trip.getPrice(),trip.getDeparture(),trip.getDestination()));
             a.setStatus(HttpStatus.OK);
             a.setMessage("success");
             return a;
@@ -348,7 +346,7 @@ public class FirstController {
         @PostMapping("/getUserProfile")
         public ApiResponse<User> getUserProfile(@RequestBody User user){
             ApiResponse<User> u = new ApiResponse<>();
-            u.setResponse(userinterface.getUserProfile(user.getPhonenumber()));
+            u.setResponse(userInterface.getUserProfile(user.getPhonenumber()));
             u.setStatus(HttpStatus.OK);
             u.setMessage("success");
             return u;
@@ -358,7 +356,7 @@ public class FirstController {
             @PostMapping("/getFileManifestToDownload")
             public ApiResponse<String> getFileManifestToDownload(@RequestBody Trips trip){
                 ApiResponse<String> u = new ApiResponse<>();
-                u.setResponse(userinterface.getManifestFileToDownload(trip.getDeparture(),trip.getDestination(),
+                u.setResponse(userInterface.getManifestFileToDownload(trip.getDeparture(),trip.getDestination(),
                         trip.getDate(),trip.getVehiclenumber(),trip.getTransportcompany()));
                 u.setStatus(HttpStatus.OK);
                 u.setMessage("success");
@@ -370,20 +368,49 @@ public class FirstController {
                 @DeleteMapping("/adminToDeleteUser/{id}")
                 public ApiResponse<Long> deleteUserForAdmin(@PathVariable long id){
                     ApiResponse<Long> u = new ApiResponse<>();
-                    u.setResponse(userinterface.deleteMobileUserAccountByAdmin(id));
+                    u.setResponse(userInterface.deleteMobileUserAccountByAdmin(id));
                     u.setStatus(HttpStatus.OK);
                     u.setMessage("success");
                     return u;
                 }
-
 
                 @PostMapping("/orderTripsBasedonPriceInAscendingOrder")
                 public ApiResponse<List<Trips>> getTripsBasedOnPriceInAscendingOrder(@RequestBody Trips trip){
                     ApiResponse<List<Trips>> u = new ApiResponse<>();
-                    u.setResponse(userinterface.getListOfTripsBasedOnPriceInAscendingOrder(trip.getDeparture(),trip.getDestination(),trip.getDate()));
+                    u.setResponse(userInterface.getListOfTripsBasedOnPriceInAscendingOrder(trip.getDeparture(),trip.getDestination(),trip.getDate()));
                     u.setStatus(HttpStatus.OK);
                     u.setMessage("success");
                     return u;
                 }
+
+
+                @PostMapping("/getTripDetailsUsingId")
+                public ApiResponse<Trips> getTripDetailsUsingId(@RequestBody Trips trips){
+                    ApiResponse<Trips> u = new ApiResponse<>();
+                    u.setResponse(userInterface.getTripDetailsUsingId(trips.getId()));
+                    u.setStatus(HttpStatus.OK);
+                    u.setMessage("success");
+                    return u;
+                }
+
+
+//                @PostMapping("/registerExtraRiders")
+                @RequestMapping(value = "/registerExtraRiders", method = RequestMethod.POST, headers = "Accept=application/json")
+                public ApiResponse<String> registerExtraRiders(@RequestParam(value = "ridername[]") String[] ridername,
+                                                               @RequestParam(value = "riderphonenumber[]") String[] riderphonenumber,
+                                                               @RequestParam(value = "phonenumber") String phonenumber,
+                                                               @RequestParam int numberofriders){
+                ApiResponse<String> u = new ApiResponse<>();
+                ridername = new String[numberofriders];
+                riderphonenumber = new String[numberofriders];
+               String user = userInterface.registerCoRiders(ridername,riderphonenumber,phonenumber,numberofriders);
+                u.setStatus(HttpStatus.OK);
+                u.setMessage("success");
+                return u;
+                }
+
+
+
+
 
 }

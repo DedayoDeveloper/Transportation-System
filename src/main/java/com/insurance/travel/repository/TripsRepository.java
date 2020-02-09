@@ -28,6 +28,8 @@ public interface TripsRepository extends JpaRepository<Trips, Long>{
 
     List<Trips> findByDepartureAndDestinationAndDate(String departure,String destination,String date);
 
+    Trips findById(long id);
+
     @Modifying
     @Transactional
     @Query("update Trips t set t.filedownloaduri = :filedownloaduri where vehiclenumber = :vehicleNumber")
@@ -38,8 +40,8 @@ public interface TripsRepository extends JpaRepository<Trips, Long>{
 
     List<Trips> findAllByDepartureAndDestinationAndDateOrderByPriceAsc(String departure, String destination, String date);
 
-    @Query("select t from Trips t where t.price <= :price and t.departurepark = :departurepark and t.arrivalpark = :arrivalpark and t.time = :time")
-    List<Trips> getAllFilteredTrips(@Param("price")BigDecimal price,@Param("departurepark") String departurepark, @Param("arrivalpark") String arrivalpark,@Param("time") String time);
+    @Query("select t from Trips t where t.price <= :price and t.departure = :departure and t.destination = :destination")
+    List<Trips> getAllFilteredTrips(@Param("price")BigDecimal price,@Param("departure") String departure, @Param("destination") String destination);
 
     @Query("select t.filedownloaduri from Trips  t where t.departure = :departure and t.destination = :destination and t.date = :date and t.vehiclenumber = :vehiclenumber and t.transportcompany = :transportcompany")
     String getTripFileManifestToDownload(@Param("departure") String departure,@Param("destination") String destination,
