@@ -47,5 +47,5 @@ public String updatePassword(String password,String phonenumber);
     public long deleteMobileUserAccountByAdmin(long id);
     public List<Trips> getListOfTripsBasedOnPriceInAscendingOrder(String departure,String destination,String date);
     public Trips getTripDetailsUsingId(long id);
-    public String registerCoRiders(String[] coRiderName, String[] coRiderPhoneNumber,String phonenumber,int numberOfRiders);
+    public String registerCoRiders(String coRiderName, String coRiderPhoneNumber,String phonenumber);
 }

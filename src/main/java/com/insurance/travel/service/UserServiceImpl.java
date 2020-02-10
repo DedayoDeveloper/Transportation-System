@@ -475,26 +475,18 @@ public class UserServiceImpl implements UserInterface{
 
     @Override
     @TrackTime
-    public String registerCoRiders(String[] coRiderName, String[] coRiderPhoneNumber,String phonenumber,int numberOfRiders){
+    public String registerCoRiders(String coRiderName, String coRiderPhoneNumber,String phonenumber){
         User checkUser = repository.findByPhonenumber(phonenumber);
-
-
-
-        if(checkUser == null){
+        logger.info("DEBUGGING!!");
+        if(checkUser == null) {
             throw new RuntimeException("No User Found");
         }
 
-        coRiderName = new String[numberOfRiders];
-        coRiderPhoneNumber = new String[numberOfRiders];
-
-        for (int i = 1; i <= numberOfRiders; i++) {
-            CoRiders riders = new CoRiders();
-            riders.setRidername(coRiderName);
-            riders.setPhonenumber(phonenumber);
-            riders.setRiderphonenumber(coRiderPhoneNumber);
-            coRiders.save(riders);
-        }
-
+        CoRiders riders = new CoRiders();
+        riders.setCoridername(coRiderName);
+        riders.setCoriderphonenumber(coRiderPhoneNumber);
+        riders.setPhonenumber(phonenumber);
+        coRiders.save(riders);
         return "Succesfully Saved";
     }
 

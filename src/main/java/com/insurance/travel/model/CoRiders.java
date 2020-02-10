@@ -2,6 +2,7 @@ package com.insurance.travel.model;
 
 
 import javax.persistence.*;
+import java.util.Arrays;
 
 @Entity
 @Table(name = "coriders")
@@ -14,15 +15,10 @@ public class CoRiders {
 
     private String phonenumber;
     @Column(name = "numberofriders", nullable = true)
-    private int numberOfRiders;
-    private String[] ridername;
-    private String[] riderphonenumber;
+    private int numberofriders;
+    private String coridername;
+    private String coriderphonenumber;
 
-
-    @Override
-    public String toString() {
-        return "coRiders : [ridername=" + ridername + ", riderphonenumber=" + riderphonenumber + "]";
-    }
 
     public long getId() {
         return id;
@@ -40,27 +36,38 @@ public class CoRiders {
         this.phonenumber = phonenumber;
     }
 
-    public String[] getRidername() {
-        return ridername;
+    public String getCoridername() {
+        return coridername;
     }
 
-    public void setRidername(String[] ridername) {
-        this.ridername = ridername;
+    public void setCoridername(String coridername) {
+        this.coridername = coridername;
     }
 
-    public String[] getRiderphonenumber() {
-        return riderphonenumber;
+    public String getCoriderphonenumber() {
+        return coriderphonenumber;
     }
 
-    public void setRiderphonenumber(String[] riderphonenumber) {
-        this.riderphonenumber = riderphonenumber;
+    public void setCoriderphonenumber(String coriderphonenumber) {
+        this.coriderphonenumber = coriderphonenumber;
     }
 
-    public int getNumberOfRiders() {
-        return numberOfRiders;
+    public int getNumberofriders() {
+        return numberofriders;
     }
 
-    public void setNumberOfRiders(int numberOfRiders) {
-        this.numberOfRiders = numberOfRiders;
+    public void setNumberofriders(int numberofriders) {
+        this.numberofriders = numberofriders;
+    }
+
+    @Override
+    public String toString() {
+        return "CoRiders{" +
+                "id=" + id +
+                ", phonenumber='" + phonenumber + '\'' +
+                ", numberOfRiders=" + numberofriders +
+                ", coridername=" + coridername +
+                ", coriderphonenumber=" + coriderphonenumber +
+                '}';
     }
 }

@@ -18,7 +18,6 @@ import com.insurance.travel.tokenConfig.JwtUtil;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -394,16 +393,22 @@ public class FirstController {
                 }
 
 
-//                @PostMapping("/registerExtraRiders")
+
                 @RequestMapping(value = "/registerExtraRiders", method = RequestMethod.POST, headers = "Accept=application/json")
-                public ApiResponse<String> registerExtraRiders(@RequestParam(value = "ridername[]") String[] ridername,
-                                                               @RequestParam(value = "riderphonenumber[]") String[] riderphonenumber,
-                                                               @RequestParam(value = "phonenumber") String phonenumber,
-                                                               @RequestParam int numberofriders){
+                public ApiResponse<String> registerExtraRiders(@RequestBody ExtraRiders coRiders){
                 ApiResponse<String> u = new ApiResponse<>();
-                ridername = new String[numberofriders];
-                riderphonenumber = new String[numberofriders];
-               String user = userInterface.registerCoRiders(ridername,riderphonenumber,phonenumber,numberofriders);
+                try {
+                    int getSize = coRiders.getNumberofriders();
+                    String riderName = null;
+                    String riderPhonenumber = null;
+                    for (int i = 0; i <= getSize; i++) {
+                        riderName = coRiders.getCoridername()[i];
+                        riderPhonenumber = coRiders.getCoriderphonenumber()[i];
+                        u.setResponse(userInterface.registerCoRiders(riderName, riderPhonenumber, coRiders.getPhonenumber()));
+                    }
+                } catch (ArrayIndexOutOfBoundsException a){
+
+                }
                 u.setStatus(HttpStatus.OK);
                 u.setMessage("success");
                 return u;
