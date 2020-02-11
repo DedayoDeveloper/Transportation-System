@@ -27,7 +27,7 @@ public interface UserInterface {
    public User signIn(User userDetails);
    public String updateUserNextOfKin(String kinname,String kinphonenumber, String kinemail,String kinaddress,String phonenumber);
    public List<Trips> findTrips(String departure,String destination,String date);
-   public TripBooking bookTrips(TripBooking book);
+    public TripBooking bookTrips(long id, String phonenumber, String fullname, String numberofseats);
     public Trips adminToCreateTripsForBooking(Trips trip);
     public TripBooking searchPassengerOnTrip(TripBooking trip);
     public List<TripBooking> getAllPassengersOnATrip(TripBooking searchTrip);

@@ -235,16 +235,19 @@ public class UserServiceImpl implements UserInterface{
     // SERVICE FOR USER TO BOOK TRIPS
     @Override
     @TrackTime
-    public TripBooking bookTrips(TripBooking book){
-    TripBooking trip = new TripBooking();
-    trip.setBoarding(book.getBoarding());
-    trip.setDeparturedate(book.getDeparturedate());
-    trip.setDestination(book.getDestination());
-    trip.setPrice(book.getPrice());
-    trip.setNumberofseats(book.getNumberofseats());
-    trip.setFullname(book.getFullname());
-    trip.setPhonenumber(book.getPhonenumber());
-    return tripbookrepo.save(trip);
+    public TripBooking bookTrips(long id, String phonenumber, String fullname, String numberofseats){
+        Trips tripDetails = tripsrepository.findById(id);
+        TripBooking bookTrip = new TripBooking();
+        bookTrip.setTransportcompany(tripDetails.getTransportcompany());
+        bookTrip.setDestination(tripDetails.getDestination());
+        bookTrip.setDeparturedate(tripDetails.getDate());
+        bookTrip.setPhonenumber(phonenumber);
+        bookTrip.setFullname(fullname);
+        bookTrip.setNumberofseats(numberofseats);
+        bookTrip.setPrice(tripDetails.getPrice());
+        bookTrip.setDeparture(tripDetails.getDeparture());
+        tripbookrepo.save(bookTrip);
+        return bookTrip;
     }
 
 
@@ -287,7 +290,7 @@ public class UserServiceImpl implements UserInterface{
     @Override
     @TrackTime
     public List<TripBooking> getAllPassengersOnATrip(TripBooking searchTrip){
-        List<TripBooking> getAllPassengers = tripbookrepo.getAllPassengersOnATrip(searchTrip.getBoarding(), searchTrip.getDestination());
+        List<TripBooking> getAllPassengers = tripbookrepo.getAllPassengersOnATrip(searchTrip.getTransportcompany(), searchTrip.getDestination());
         if(getAllPassengers == null){
             throw new RuntimeException("No passengers avialable or trip has not been registered");
         }

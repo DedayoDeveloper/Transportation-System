@@ -131,10 +131,10 @@ public class FirstController {
 
       
       // USER BOOK A TRIP
-      @PostMapping("/booktrips")
-      public ApiResponse<TripBooking> bookTrips(@RequestBody TripBooking trip){
+      @PostMapping("/booktrips/{id}")
+      public ApiResponse<TripBooking> bookTrips(@RequestBody TripBooking tripDetails, @PathVariable("id") long id){
       ApiResponse<TripBooking> u = new ApiResponse<>();
-      u.setResponse(userInterface.bookTrips(trip));
+      u.setResponse(userInterface.bookTrips(id,tripDetails.getPhonenumber(),tripDetails.getFullname(),tripDetails.getNumberofseats()));
       u.setStatus(HttpStatus.OK);
       u.setMessage("Success");
       return u;
@@ -413,6 +413,8 @@ public class FirstController {
                 u.setMessage("success");
                 return u;
                 }
+
+
 
 
 

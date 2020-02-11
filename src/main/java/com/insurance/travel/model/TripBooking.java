@@ -14,6 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.math.BigDecimal;
+
 /**
  *
  * @author oreoluwa
@@ -27,9 +29,13 @@ public class TripBooking {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
     
-    @Column(name = "boarding", nullable = false)
-    private String boarding;
-    
+    @Column(name = "transportcompany", nullable = false)
+    private String transportcompany;
+
+    @Column(name = "departure" , nullable = false)
+    private String departure;
+
+
     @Column(name = "destination", nullable = false)
     private String destination;
     
@@ -37,7 +43,7 @@ public class TripBooking {
     private String departuredate;
     
     @Column(name = "price", nullable = false)
-    private String price;
+    private BigDecimal price;
     
     @Column(name = "numberofseats", nullable = false)
     private String numberofseats;
@@ -48,6 +54,14 @@ public class TripBooking {
     
     @Column(name = "phonenumber", nullable = false)
     private String phonenumber;
+
+    public String getDeparture() {
+        return departure;
+    }
+
+    public void setDeparture(String departure) {
+        this.departure = departure;
+    }
 
     public String getFullname() {
         return fullname;
@@ -74,12 +88,12 @@ public class TripBooking {
         this.id = id;
     }
 
-    public String getBoarding() {
-        return boarding;
+    public String getTransportcompany() {
+        return transportcompany;
     }
 
-    public void setBoarding(String boarding) {
-        this.boarding = boarding;
+    public void setTransportcompany(String transportcompany) {
+        this.transportcompany = transportcompany;
     }
 
     public String getDestination() {
@@ -98,11 +112,11 @@ public class TripBooking {
         this.departuredate = departuredate;
     }
 
-    public String getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(String price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 

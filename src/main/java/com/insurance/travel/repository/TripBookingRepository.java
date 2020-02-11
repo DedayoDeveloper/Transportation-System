@@ -22,7 +22,7 @@ public interface TripBookingRepository extends JpaRepository<TripBooking, Long>{
     @Query("select t from TripBooking t where phonenumber = :phonenumber")
     TripBooking getPassengerRegisteredForTrip(@Param("phonenumber") String phonenumber);
     
-    @Query("select t from TripBooking t where t.boarding = :boarding and t.destination = :destination")
-    List<TripBooking> getAllPassengersOnATrip(@Param("boarding") String boarding, @Param("destination") String destination);
+    @Query("select t from TripBooking t where t.transportcompany = :transportcompany and t.destination = :destination")
+    List<TripBooking> getAllPassengersOnATrip(@Param("transportcompany") String transportcompany, @Param("destination") String destination);
     
 }
