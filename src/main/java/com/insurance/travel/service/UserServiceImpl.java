@@ -61,9 +61,9 @@ public class UserServiceImpl implements UserInterface{
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     public static final String ACCOUNT_SID =
-            "AC57e344c7aea908f9e5b230c995052ff3";
+            "**********************************";
     public static final String AUTH_TOKEN =
-            "0f196c60007c235bac3ddd343f3ee0e2";
+            "**********************************";
 
 
     public void sendSmsMessage(String phonenumber,String body){
