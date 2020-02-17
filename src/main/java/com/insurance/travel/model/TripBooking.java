@@ -35,7 +35,6 @@ public class TripBooking {
     @Column(name = "departure" , nullable = false)
     private String departure;
 
-
     @Column(name = "destination", nullable = false)
     private String destination;
     
@@ -46,7 +45,7 @@ public class TripBooking {
     private BigDecimal price;
     
     @Column(name = "numberofseats", nullable = false)
-    private String numberofseats;
+    private int numberofseats;
     
     
     @Column(name = "fullname", nullable = false)
@@ -120,11 +119,11 @@ public class TripBooking {
         this.price = price;
     }
 
-    public String getNumberofseats() {
+    public int getNumberofseats() {
         return numberofseats;
     }
 
-    public void setNumberofseats(String numberofseats) {
+    public void setNumberofseats(int numberofseats) {
         this.numberofseats = numberofseats;
     }
     

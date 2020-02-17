@@ -5,7 +5,10 @@
  */
 package com.insurance.travel.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.insurance.travel.fileupload.FileStorageService;
 import com.insurance.travel.fileupload.Response;
 import com.insurance.travel.model.*;
@@ -17,6 +20,7 @@ import com.insurance.travel.service.myUserDetailsService;
 import com.insurance.travel.tokenConfig.JwtUtil;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -132,9 +136,25 @@ public class FirstController {
       
       // USER BOOK A TRIP
       @PostMapping("/booktrips/{id}")
-      public ApiResponse<TripBooking> bookTrips(@RequestBody TripBooking tripDetails, @PathVariable("id") long id){
-      ApiResponse<TripBooking> u = new ApiResponse<>();
-      u.setResponse(userInterface.bookTrips(id,tripDetails.getPhonenumber(),tripDetails.getFullname(),tripDetails.getNumberofseats()));
+      public ApiResponse<String> bookTrips(@RequestBody ObjectNode tripDetails, @PathVariable("id") long id){
+      ApiResponse<String> u = new ApiResponse<>();
+      String phonenumber = tripDetails.get("phonenumber").asText();
+      String fullname = tripDetails.get("fullname").asText();
+      JsonNode objectNumberOfSeats = tripDetails.get("numberofseats");
+      int numberOfSeats = objectNumberOfSeats.asInt();
+      JsonNode objectCoRider = tripDetails.get("corider");
+      userInterface.bookTrips(id,phonenumber,fullname,numberOfSeats);
+      if(numberOfSeats > 0)
+           try {
+               for (int i = 0; i <= numberOfSeats; i++) {
+               JsonNode riderNames = objectCoRider.get(i).get("coridername");
+               JsonNode riderPhoneNumber = objectCoRider.get(i).get("coriderphonenumber");
+               String coRiderName = riderNames.asText();
+               String coRiderPhonenumber = riderPhoneNumber.asText();
+               userInterface.registerCoRiders(coRiderName,coRiderPhonenumber,phonenumber);
+               }
+               } catch (NullPointerException n){}
+      u.setResponse("Booking Successful");
       u.setStatus(HttpStatus.OK);
       u.setMessage("Success");
       return u;
@@ -393,28 +413,14 @@ public class FirstController {
                 }
 
 
-
-                @RequestMapping(value = "/registerExtraRiders", method = RequestMethod.POST, headers = "Accept=application/json")
-                public ApiResponse<String> registerExtraRiders(@RequestBody ExtraRiders coRiders){
-                ApiResponse<String> u = new ApiResponse<>();
-                try {
-                    int getSize = coRiders.getNumberofriders();
-                    String riderName = null;
-                    String riderPhonenumber = null;
-                    for (int i = 0; i <= getSize; i++) {
-                        riderName = coRiders.getCoridername()[i];
-                        riderPhonenumber = coRiders.getCoriderphonenumber()[i];
-                        u.setResponse(userInterface.registerCoRiders(riderName, riderPhonenumber, coRiders.getPhonenumber()));
-                    }
-                } catch (ArrayIndexOutOfBoundsException a){
-
+                @PostMapping("/getBookedTripsByPhonenumber")
+                public ApiResponse<List<TripBooking>> getBookedTripsForEachUser(@RequestBody TripBooking trip){
+                    ApiResponse<List<TripBooking>> u = new ApiResponse<>();
+                    u.setResponse(userInterface.getBookedTrips(trip.getPhonenumber()));
+                    u.setStatus(HttpStatus.OK);
+                    u.setMessage("success");
+                    return u;
                 }
-                u.setStatus(HttpStatus.OK);
-                u.setMessage("success");
-                return u;
-                }
-
-
 
 
 

@@ -14,8 +14,6 @@ public class CoRiders {
 
 
     private String phonenumber;
-    @Column(name = "numberofriders", nullable = true)
-    private int numberofriders;
     private String coridername;
     private String coriderphonenumber;
 
@@ -52,20 +50,13 @@ public class CoRiders {
         this.coriderphonenumber = coriderphonenumber;
     }
 
-    public int getNumberofriders() {
-        return numberofriders;
-    }
 
-    public void setNumberofriders(int numberofriders) {
-        this.numberofriders = numberofriders;
-    }
 
     @Override
     public String toString() {
         return "CoRiders{" +
                 "id=" + id +
                 ", phonenumber='" + phonenumber + '\'' +
-                ", numberOfRiders=" + numberofriders +
                 ", coridername=" + coridername +
                 ", coriderphonenumber=" + coriderphonenumber +
                 '}';

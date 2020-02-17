@@ -27,7 +27,7 @@ public interface UserInterface {
    public User signIn(User userDetails);
    public String updateUserNextOfKin(String kinname,String kinphonenumber, String kinemail,String kinaddress,String phonenumber);
    public List<Trips> findTrips(String departure,String destination,String date);
-    public TripBooking bookTrips(long id, String phonenumber, String fullname, String numberofseats);
+    public TripBooking bookTrips(long id, String phonenumber, String fullname, int numberOfRiders);
     public Trips adminToCreateTripsForBooking(Trips trip);
     public TripBooking searchPassengerOnTrip(TripBooking trip);
     public List<TripBooking> getAllPassengersOnATrip(TripBooking searchTrip);
@@ -48,4 +48,5 @@ public String updatePassword(String password,String phonenumber);
     public List<Trips> getListOfTripsBasedOnPriceInAscendingOrder(String departure,String destination,String date);
     public Trips getTripDetailsUsingId(long id);
     public String registerCoRiders(String coRiderName, String coRiderPhoneNumber,String phonenumber);
+    public List<TripBooking> getBookedTrips(String phonenumber);
 }

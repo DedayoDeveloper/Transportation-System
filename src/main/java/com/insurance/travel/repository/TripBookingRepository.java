@@ -18,6 +18,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface TripBookingRepository extends JpaRepository<TripBooking, Long>{
+
+    List<TripBooking> findByPhonenumber(String phonenumber);
     
     @Query("select t from TripBooking t where phonenumber = :phonenumber")
     TripBooking getPassengerRegisteredForTrip(@Param("phonenumber") String phonenumber);

@@ -61,9 +61,9 @@ public class UserServiceImpl implements UserInterface{
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     public static final String ACCOUNT_SID =
-            "**********************************";
+            "******************************";
     public static final String AUTH_TOKEN =
-            "**********************************";
+            "******************************";
 
 
     public void sendSmsMessage(String phonenumber,String body){
@@ -235,7 +235,7 @@ public class UserServiceImpl implements UserInterface{
     // SERVICE FOR USER TO BOOK TRIPS
     @Override
     @TrackTime
-    public TripBooking bookTrips(long id, String phonenumber, String fullname, String numberofseats){
+    public TripBooking bookTrips(long id, String phonenumber, String fullname, int numberOfRiders){
         Trips tripDetails = tripsrepository.findById(id);
         TripBooking bookTrip = new TripBooking();
         bookTrip.setTransportcompany(tripDetails.getTransportcompany());
@@ -243,7 +243,7 @@ public class UserServiceImpl implements UserInterface{
         bookTrip.setDeparturedate(tripDetails.getDate());
         bookTrip.setPhonenumber(phonenumber);
         bookTrip.setFullname(fullname);
-        bookTrip.setNumberofseats(numberofseats);
+        bookTrip.setNumberofseats(numberOfRiders);
         bookTrip.setPrice(tripDetails.getPrice());
         bookTrip.setDeparture(tripDetails.getDeparture());
         tripbookrepo.save(bookTrip);
@@ -480,7 +480,6 @@ public class UserServiceImpl implements UserInterface{
     @TrackTime
     public String registerCoRiders(String coRiderName, String coRiderPhoneNumber,String phonenumber){
         User checkUser = repository.findByPhonenumber(phonenumber);
-        logger.info("DEBUGGING!!");
         if(checkUser == null) {
             throw new RuntimeException("No User Found");
         }
@@ -494,5 +493,14 @@ public class UserServiceImpl implements UserInterface{
     }
 
 
+    @Override
+    @TrackTime
+    public List<TripBooking> getBookedTrips(String phonenumber){
+        List<TripBooking> getBookedTrips = tripbookrepo.findByPhonenumber(phonenumber);
+        if(getBookedTrips.isEmpty()){
+            throw new RuntimeException("No Trips Available");
+        }
+        return getBookedTrips;
+    }
 
 }
