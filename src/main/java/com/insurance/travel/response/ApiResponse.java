@@ -17,6 +17,8 @@ public class ApiResponse<T> {
     private HttpStatus status;
     private String message;
     private String error;
+    private String responsecode;
+    private int count;
 
     public String getError() {
         return error;
@@ -51,8 +53,20 @@ public class ApiResponse<T> {
     public void setMessage(String message) {
         this.message = message;
     }
-    
-    
-    
-    
+
+    public String getResponsecode() {
+        return responsecode;
+    }
+
+    public void setResponsecode(String responsecode) {
+        this.responsecode = responsecode;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
 }

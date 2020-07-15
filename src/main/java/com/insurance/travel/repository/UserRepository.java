@@ -34,6 +34,11 @@ public interface UserRepository extends JpaRepository<User , Long>{
 
     long deleteById(long id);
 
+    @Modifying
+    @Transactional
+    @Query("update User u set u.otpgenerationtime = :otpgenerationtime, u.token = :token where u.phonenumber = :phonenumber")
+    int resendOtpTokenForUserAuthentication(@Param("otpgenerationtime") Date otpGenerationTime, @Param("token") String token, @Param("phonenumber") String phoneNumber);
+
 
 
     @Query("select u from User u where u.phonenumber = :phonenumber")
@@ -56,8 +61,9 @@ public interface UserRepository extends JpaRepository<User , Long>{
 
     @Transactional
     @Modifying
-    @Query("update User u set u.enabled = 1 where u.phonenumber = :phonenumber")
-    int authenticateUser (@Param("phonenumber") String phonenumber);
+    @Query("update User u set u.enabled = 1, u.isFirstTimeLogin = :isfirsttimelogin  where u.phonenumber = :phonenumber")
+    int authenticateUser (@Param("isfirsttimelogin") String isfirsttimelogin,@Param("phonenumber") String phonenumber);
+
 
 
     @Query("select u.enabled from User u where u.phonenumber = :phonenumber")
@@ -74,10 +80,11 @@ public interface UserRepository extends JpaRepository<User , Long>{
 
 
 
+    @Transactional
+    @Modifying
+    @Query("update User u set u.password = :password, u.isFirstTimeLogin = :isFirstTimeLogin, u.enabled = 1 where u.phonenumber = :phonenumber")
+    int updateBusAgentPassword(@Param("password") String password,@Param("isFirstTimeLogin") String isFirstTimeLogin, @Param("phonenumber") String phoneNumber);
 
 
-
-
-
-
+    List<User> findAllByRole(String role);
 }

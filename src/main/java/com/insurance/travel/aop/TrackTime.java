@@ -1,4 +1,4 @@
-package com.insurance.travel;
+package com.insurance.travel.aop;
 
 
 import java.lang.annotation.ElementType;

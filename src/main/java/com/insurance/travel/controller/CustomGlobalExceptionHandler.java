@@ -30,6 +30,7 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
         error.setStatus(HttpStatus.NOT_FOUND);
         error.setError("Error Found");
         error.setMessage(ex.getMessage());
+        error.setResponsecode("99");
         return error;
     }
     

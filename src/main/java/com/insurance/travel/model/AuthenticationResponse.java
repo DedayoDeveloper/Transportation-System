@@ -12,16 +12,25 @@ package com.insurance.travel.model;
 public class AuthenticationResponse {
     
     private final String jwt;
-    
-      public AuthenticationResponse(String jwt) {
+    private final User user;
+    private final String isFirstTimeLogin;
+
+
+    public AuthenticationResponse(String jwt, User userDetails, String isFirstTimeLogin) {
         this.jwt = jwt;
+        this.user = userDetails;
+        this.isFirstTimeLogin = isFirstTimeLogin;
     }
-    
-    
+
+    public String getIsFirstTimeLogin() {
+        return isFirstTimeLogin;
+    }
 
     public String getJwt() {
         return jwt;
     }
-    
-    
+
+    public User getUser() {
+        return user;
+    }
 }

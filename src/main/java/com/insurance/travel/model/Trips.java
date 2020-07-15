@@ -12,9 +12,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  *
@@ -38,14 +42,15 @@ public class Trips {
     private String departure;
     
     @Column(name = "date", nullable = true)
-    private String date;
+    private Date date;
     
     @Column(name = "price", nullable = true)
     private BigDecimal price;
     
     @Column(name = "seats", nullable = true)
     private String seats;
-    
+
+    @JsonIgnore
     @Column(name = "transportcompany", nullable = true)
     private String transportcompany;
     
@@ -56,7 +61,7 @@ public class Trips {
     private String vehicletype;
     
     @Column(name = "departuretime", nullable = true)
-    private String time;
+    private Timestamp time;
 
     @Column(name = "drivername", nullable = true)
     private String drivername;
@@ -130,11 +135,11 @@ public class Trips {
         this.vehicletype = vehicletype;
     }
 
-    public String getTime() {
+    public Timestamp getTime() {
         return time;
     }
 
-    public void setTime(String time) {
+    public void setTime(Timestamp time) {
         this.time = time;
     }
     
@@ -164,11 +169,11 @@ public class Trips {
         this.departure = departure;
     }
 
-    public String getDate() {
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 

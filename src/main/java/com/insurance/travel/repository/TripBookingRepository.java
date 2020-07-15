@@ -6,6 +6,8 @@
 package com.insurance.travel.repository;
 
 import com.insurance.travel.model.TripBooking;
+
+import java.util.Date;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -26,5 +28,11 @@ public interface TripBookingRepository extends JpaRepository<TripBooking, Long>{
     
     @Query("select t from TripBooking t where t.transportcompany = :transportcompany and t.destination = :destination")
     List<TripBooking> getAllPassengersOnATrip(@Param("transportcompany") String transportcompany, @Param("destination") String destination);
-    
+
+    List<TripBooking> findAllByDeparturedate(Date departuredate);
+
+    @Query("select count(*) from TripBooking t where t.departuredate = :departuredate")
+    int CountAllByDate(@Param("departuredate") Date departuredate);
+
+    TripBooking findAllByPhonenumberAndDeparturedate(String phonenumber, Date departuredate);
 }

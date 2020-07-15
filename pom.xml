@@ -126,6 +126,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+		<finalName>DTI</finalName>
 	</build>
 
 </project>

@@ -28,7 +28,7 @@ public class User {
     private String fullname;
 
 
-    @Column(name = "otpgenerationtime", nullable = false)
+    @Column(name = "otpgenerationtime", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
     private Date otpgenerationtime;
 
@@ -74,6 +74,9 @@ public class User {
 
     @Column(name = "token", nullable = true)
     private String token;
+
+    @Column(name = "isfirsttimelogin", nullable = false)
+    private String isFirstTimeLogin;
 
 
     public Date getPasswordgentokentime() {
@@ -196,4 +199,11 @@ public class User {
         this.password = password;
     }
 
+    public String getIsFirstTimeLogin() {
+        return isFirstTimeLogin;
+    }
+
+    public void setIsFirstTimeLogin(String isFirstTimeLogin) {
+        this.isFirstTimeLogin = isFirstTimeLogin;
+    }
 }

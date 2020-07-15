@@ -4,18 +4,15 @@
  * and open the template in the editor.
  */
 package com.insurance.travel.service;
-
-import com.insurance.travel.TrackTime;
+import com.insurance.travel.aop.TrackTime;
 import com.insurance.travel.model.CoRiders;
 import com.insurance.travel.model.TripBooking;
 import com.insurance.travel.model.Trips;
 import com.insurance.travel.model.User;
-
 import com.insurance.travel.repository.CoRiderRepository;
 import com.insurance.travel.repository.TripBookingRepository;
 import com.insurance.travel.repository.TripsRepository;
 import com.insurance.travel.repository.UserRepository;
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -61,9 +58,15 @@ public class UserServiceImpl implements UserInterface{
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     public static final String ACCOUNT_SID =
-            "******************************";
+            "AC7ec8ec3da429b75f59719d6812cb9580";
     public static final String AUTH_TOKEN =
-            "******************************";
+            "7088973d5d852140f8e9296b1b9cfce9";
+
+
+//    @Scheduled(fixedRate = 2000)
+//    public void test(){
+//        logger.info("HELLO TEST");
+//    }
 
 
     public void sendSmsMessage(String phonenumber,String body){
@@ -71,12 +74,25 @@ public class UserServiceImpl implements UserInterface{
                 Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
         Message message = Message
                 .creator(new PhoneNumber(phonenumber), // to
-                        new PhoneNumber("+18177797043"), // from
+                        new PhoneNumber("+12058329898"), // from
                         body)
                 .create();
         logger.info("MESSAGE STATUS INFO FROM TWILIO = " + message);
     }
 
+    @Override
+    @TrackTime
+    public String resendOtpTokenForAuthentication(String phoneNumber){
+        String otp = String.valueOf(Math.random()).substring(2, 6);
+        Date otpGenerationTime = new Date();
+        int updateOtp = repository.resendOtpTokenForUserAuthentication(otpGenerationTime,otp,phoneNumber);
+        if(updateOtp != 1){
+            throw new RuntimeException("Error with details, Please verify phonenumber");
+        }
+       sendSmsMessage(phoneNumber, "Please use supplied token to login " + otp);
+        String response = "Token sent successfully";
+        return response;
+    }
 
 
     
@@ -117,6 +133,7 @@ public class UserServiceImpl implements UserInterface{
     user.setKinname(createuser.getKinname());
     user.setKinphonenumber(createuser.getKinphonenumber());
 
+
   // SEND SMS MESSAGE WITH TWILIO API
         String body = " Dear " + createuser.getFullname() + " your profile has been created please submit token " + otp + " to log in, token valid for 30 minutes";
         sendSmsMessage(createuser.getPhonenumber(), body);
@@ -125,7 +142,45 @@ public class UserServiceImpl implements UserInterface{
     user.setKinemail(createuser.getKinemail());
     user.setKinaddress(createuser.getKinaddress());
     user.setRole(role);
+    user.setIsFirstTimeLogin("true");
     return repository.save(user);
+    }
+
+
+
+    @Override
+    public User adminSignIn(String phoneNumber, String password){
+        User adminUser = repository.findByPhonenumber(phoneNumber);
+        String adminRole = adminUser.getRole();
+        logger.info("UserRole = " + adminRole);
+        if(adminUser.getRole().contains("ROLE_USER")){
+            throw new RuntimeException("YOU ARE NOT AUTHORIZED TO SIGN IN");
+        }
+        boolean passwordcheck = passwordencoder.matches(password, adminUser.getPassword());
+        if (passwordcheck == false) {
+            throw new RuntimeException("Incorrect Password.");
+        }
+        return adminUser;
+    }
+
+    @Override
+    public User busAgentAdminSignIn(String phoneNumber, String password){
+        User busAdminUser = repository.findByPhonenumber(phoneNumber);
+        String userRole = busAdminUser.getRole();
+        boolean passwordcheck = passwordencoder.matches(password, busAdminUser.getPassword());
+        if (passwordcheck == false) {
+            throw new RuntimeException("Incorrect Password.");
+        }
+        if (busAdminUser.getIsFirstTimeLogin().equals("false")) {
+            if (busAdminUser.getRole().contains("ROLE_BUSADMIN")) {
+                return busAdminUser;
+            } else {
+                throw new RuntimeException("You are not authorized to log in. ");
+            }
+
+        } else {
+            return null;
+        }
     }
 
 
@@ -144,11 +199,12 @@ public class UserServiceImpl implements UserInterface{
     }
 
 
-    // VERIFY PHONE NUMBER TOKEN FOR USER AUTHENTICATION
+    // VERIFY PHONE NUMBER TOKEN FOR USER AUTHENTICATION AND ALSO EXPIRE THE TOKEN
     @Override
     @TrackTime
     public String verifyTokenForUserAuthentication(String token,String phonenumber){
         User getUserTokenDetails = repository.findByPhonenumberAndAndToken(phonenumber,token);
+        String setUserFirstTimeLogin = "false";
         if (getUserTokenDetails == null){
             throw new RuntimeException("Wrong token details");
         }
@@ -166,7 +222,7 @@ public class UserServiceImpl implements UserInterface{
         if(difference > 1800000){
             throw new RuntimeException("Sorry User token only valid for 30 minutes");
         }
-        int updateUser = repository.authenticateUser(phonenumber);
+        int updateUser = repository.authenticateUser(setUserFirstTimeLogin,phonenumber);
         return  "Verification successful";
     }
 
@@ -177,19 +233,23 @@ public class UserServiceImpl implements UserInterface{
     // USER SIGN IN WITH PHONE-NUMBER AND PASSWORD
     @Override
     @TrackTime
-    public User signIn(User userDetails){
-    User user = repository.findByPhonenumber(userDetails.getPhonenumber());
+    public User signIn(String phoneNumber , String password){
+    User user = repository.findByPhonenumber(phoneNumber);
+    String matchPassword = user.getPassword();
     if (user == null){ throw new RuntimeException("Invalid user details"); }
-    boolean passwordcheck = passwordencoder.matches(userDetails.getPassword(),user.getPassword());
+    boolean passwordcheck = passwordencoder.matches(password,matchPassword);
     if(passwordcheck == false){
             throw new RuntimeException("Invalid Password");
         }
+        String isFirstTimeLogin = user.getIsFirstTimeLogin();
       int authorized = user.getEnabled();
-
-            if (authorized == 0)
-            {
+        if (isFirstTimeLogin.equals("false")) {
+            if (authorized == 0) {
                 throw new RuntimeException("You are not authorized to log in");
             }
+        }else{
+            return null;
+        }
     return user;
     }
     
@@ -223,7 +283,7 @@ public class UserServiceImpl implements UserInterface{
     // SERVICE FOR USER TO FIND TRIPS
     @TrackTime
     @Override
-    public List<Trips> findTrips(String departure,String destination,String date){
+    public List<Trips> findTrips(String departure, String destination, Date date){
     List<Trips> trip = tripsrepository.findByDepartureAndDestinationAndDate(departure,destination,date);
     if(trip.isEmpty())
         throw new RuntimeException("No trips avialable");
@@ -235,17 +295,21 @@ public class UserServiceImpl implements UserInterface{
     // SERVICE FOR USER TO BOOK TRIPS
     @Override
     @TrackTime
-    public TripBooking bookTrips(long id, String phonenumber, String fullname, int numberOfRiders){
+    public TripBooking bookTrips(long id, String phonenumber, int numberOfRiders,String paymentreferenceid,String fullname){
         Trips tripDetails = tripsrepository.findById(id);
         TripBooking bookTrip = new TripBooking();
         bookTrip.setTransportcompany(tripDetails.getTransportcompany());
         bookTrip.setDestination(tripDetails.getDestination());
         bookTrip.setDeparturedate(tripDetails.getDate());
         bookTrip.setPhonenumber(phonenumber);
-        bookTrip.setFullname(fullname);
-        bookTrip.setNumberofseats(numberOfRiders);
+        bookTrip.setExtrariders(numberOfRiders);
+        if(numberOfRiders > 0){
+            bookTrip.setPrice(BigDecimal.valueOf(numberOfRiders).multiply(tripDetails.getPrice()));
+        } else
         bookTrip.setPrice(tripDetails.getPrice());
         bookTrip.setDeparture(tripDetails.getDeparture());
+        bookTrip.setPaymentreferenceid(paymentreferenceid);
+        bookTrip.setFullname(fullname);
         tripbookrepo.save(bookTrip);
         return bookTrip;
     }
@@ -254,6 +318,7 @@ public class UserServiceImpl implements UserInterface{
     // SERVICE TO SAVE CREATED TRIPS FROM ADMIN
     @Override
     @TrackTime
+
     public Trips adminToCreateTripsForBooking(Trips trip){
      Trips trips = new Trips();
      trips.setTransportcompany(trip.getTransportcompany());
@@ -269,6 +334,7 @@ public class UserServiceImpl implements UserInterface{
      trips.setDeparturepark(trip.getDeparturepark());
      trips.setArrivalpark(trip.getArrivalpark());
      return tripsrepository.save(trips);
+
     }
 
 
@@ -277,7 +343,7 @@ public class UserServiceImpl implements UserInterface{
     @Override
     @TrackTime
     public TripBooking searchPassengerOnTrip(TripBooking search) {
-        TripBooking searchedPassenger = tripbookrepo.getPassengerRegisteredForTrip(search.getPhonenumber());
+        TripBooking searchedPassenger = tripbookrepo.findAllByPhonenumberAndDeparturedate(search.getPhonenumber(), search.getDeparturedate());
         if (searchedPassenger == null) {
             throw new RuntimeException("No passenger found");
         }
@@ -387,6 +453,8 @@ public class UserServiceImpl implements UserInterface{
 
 
 
+
+
        @Override
        @TrackTime
        public User createBusStationAdmin(User userAdmin){
@@ -395,13 +463,16 @@ public class UserServiceImpl implements UserInterface{
          user.setFullname(userAdmin.getFullname());
          user.setPhonenumber(userAdmin.getPhonenumber());
 
-         // SEND SMS MESSAGE WITH TWILIO
-           String body = "Your supervisor account has been created successfully";
-           sendSmsMessage(userAdmin.getPhonenumber(),body);
-
            user.setEmail(userAdmin.getEmail());
          user.setRole(role);
          user.setPassword(passwordencoder.encode(userAdmin.getPassword()));
+         user.setOtpgenerationtime(null);
+         user.setIsFirstTimeLogin("true");
+
+           // SEND SMS MESSAGE WITH TWILIO
+           String body = "Your agent account has been created successfully supply Phonenumber:= " +
+                   userAdmin.getPhonenumber() + " and Password:= " + userAdmin.getPassword() + " to login successfully";
+           sendSmsMessage(userAdmin.getPhonenumber(),body);
          repository.save(user);
          return  user;
       }
@@ -416,7 +487,7 @@ public class UserServiceImpl implements UserInterface{
 
     @Override
     @TrackTime
-    public List<Trips> getListOfTripsBasedOnPriceInDescOrder(String departure,String destination,String date){
+    public List<Trips> getListOfTripsBasedOnPriceInDescOrder(String departure, String destination, Date date){
         List<Trips> getList = tripsrepository.findAllByDepartureAndDestinationAndDateOrderByPriceDesc(departure,destination,date);
         if(getList.isEmpty()){
             throw new RuntimeException("No trips found");
@@ -427,7 +498,7 @@ public class UserServiceImpl implements UserInterface{
 
     @Override
     @TrackTime
-    public List<Trips> getListOfTripsBasedOnPriceInAscendingOrder(String departure,String destination,String date){
+    public List<Trips> getListOfTripsBasedOnPriceInAscendingOrder(String departure, String destination, Date date){
         List<Trips> getList = tripsrepository.findAllByDepartureAndDestinationAndDateOrderByPriceAsc(departure,destination,date);
         if(getList.isEmpty()){
             throw new RuntimeException("No trips found");
@@ -450,7 +521,7 @@ public class UserServiceImpl implements UserInterface{
 
     @Override
     @TrackTime
-    public String getManifestFileToDownload(String departure,String destination,String date,String vehiclenumber,String transportcompany){
+    public String getManifestFileToDownload(String departure, String destination, Date date, String vehiclenumber, String transportcompany){
         String getFileDownloadUri = tripsrepository.getTripFileManifestToDownload(departure,destination,date,vehiclenumber,transportcompany);
         if(getFileDownloadUri == null){throw new RuntimeException("No trips found");}
         return getFileDownloadUri;
@@ -502,5 +573,25 @@ public class UserServiceImpl implements UserInterface{
         }
         return getBookedTrips;
     }
+
+
+    @Override
+    public User updateBusAdminPassword(String phoneNumber , String newPassword){
+        User busAdminUser = repository.findByPhonenumber(phoneNumber);
+        if (!busAdminUser.getRole().equals("ROLE_BUSADMIN")){
+            throw new RuntimeException("YOU ARE NOT AUTHORIZED.");
+        }
+        String password = passwordencoder.encode(newPassword);
+        String isFirstTimeLogin = "false";
+        int updatePassword = repository.updateBusAgentPassword(password,isFirstTimeLogin,phoneNumber);
+        if (updatePassword < 0){
+            throw new RuntimeException("Error updating password, Try again!");
+        }
+            return busAdminUser;
+    }
+
+
+
+
 
 }

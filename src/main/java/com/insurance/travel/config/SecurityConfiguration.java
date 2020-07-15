@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.insurance.travel;
+package com.insurance.travel.config;
 
 import com.insurance.travel.service.myUserDetailsService;
 import com.insurance.travel.tokenConfig.JwtRequestFilter;
@@ -52,7 +52,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
     
     @Override
     protected void configure(HttpSecurity http) throws Exception{
-        http.csrf().disable().authorizeRequests().antMatchers("/authenticate","/registeruser","/sendTokenToUpdatePassword","/verifyTokenForUpdatePassword","/changepassword","/verifyUserOTP").permitAll().anyRequest().authenticated()
+        http.csrf().disable().authorizeRequests().antMatchers("/authenticate",
+                "/registeruser","/sendTokenToUpdatePassword",
+                "/verifyTokenForUpdatePassword","/adminLogIn",
+                "/changepassword","/verifyUserOTP","/resendOtpForUserAuthentication",
+                "/busAdminLogin","/updateBusAdminPassword").permitAll().anyRequest().authenticated()
                 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.addFilterBefore(jwtrequestfilter, UsernamePasswordAuthenticationFilter.class);
 

@@ -1,4 +1,4 @@
-package com.insurance.travel;
+package com.insurance.travel.aop;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -35,7 +35,7 @@ public class AspectConfiguration {
 
 
 
-    @Around("@annotation(com.insurance.travel.TrackTime))")
+    @Around("@annotation(com.insurance.travel.aop.TrackTime))")
     public Object getTimeToExecuteMethod(ProceedingJoinPoint proceedingJoinPoint) throws Throwable{
         final StopWatch stopWatch = new StopWatch();
 

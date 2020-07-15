@@ -7,7 +7,6 @@ package com.insurance.travel.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.insurance.travel.fileupload.FileStorageService;
 import com.insurance.travel.fileupload.Response;
@@ -20,7 +19,6 @@ import com.insurance.travel.service.myUserDetailsService;
 import com.insurance.travel.tokenConfig.JwtUtil;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -86,7 +84,20 @@ public class FirstController {
            if (userDetails == null) {
                throw new RuntimeException("User does not exist.");
            }
-          User user = userInterface.signIn(authenticationRequest);
+
+
+          User user = userInterface.signIn(authenticationRequest.getPhonenumber(),authenticationRequest.getPassword());
+           if (user == null){
+               String jwt = null;
+               return ResponseEntity.ok(new AuthenticationResponse(jwt,user,"true"));
+           }
+           user.setPassword(null);
+           user.setPasswordupdatetoken(null);
+           user.setPasswordgentokentime(null);
+           user.setOtpgenerationtime(null);
+           user.setToken(null);
+
+
            try{
                ObjectMapper mapper = new ObjectMapper();
                logger.info(mapper.writeValueAsString(userDetails));
@@ -94,9 +105,11 @@ public class FirstController {
 
            }
         final String jwt = jwttokenutil.generateToken(userDetails);
-        return ResponseEntity.ok(new AuthenticationResponse(jwt));
+        return ResponseEntity.ok(new AuthenticationResponse(jwt,user,"false"));
     }
-    
+
+
+
     
     
     // REGISTER NEW USER
@@ -106,6 +119,7 @@ public class FirstController {
     u.setResponse(userInterface.registerUser(user));
     u.setMessage("Success");
     u.setStatus(HttpStatus.CREATED);
+    u.setResponsecode("00");
     return u;
     }
 
@@ -119,6 +133,7 @@ public class FirstController {
     u.setResponse(userInterface.updateUserNextOfKin(user.getKinname(),user.getKinphonenumber(),user.getKinemail(),user.getKinaddress(),user.getPhonenumber()));
     u.setStatus(HttpStatus.OK);
     u.setMessage("Success");
+    u.setResponsecode("00");
     return u;
     }
     
@@ -130,6 +145,7 @@ public class FirstController {
       u.setResponse(userInterface.findTrips(trip.getDeparture(),trip.getDestination(),trip.getDate()));
       u.setStatus(HttpStatus.OK);
       u.setMessage("Success");
+      u.setResponsecode("00");
       return u;
       }
 
@@ -140,11 +156,18 @@ public class FirstController {
       ApiResponse<String> u = new ApiResponse<>();
       String phonenumber = tripDetails.get("phonenumber").asText();
       String fullname = tripDetails.get("fullname").asText();
+      String paymentreferenceid = tripDetails.get("paymentreferenceid").asText();
       JsonNode objectNumberOfSeats = tripDetails.get("numberofseats");
       int numberOfSeats = objectNumberOfSeats.asInt();
       JsonNode objectCoRider = tripDetails.get("corider");
-      userInterface.bookTrips(id,phonenumber,fullname,numberOfSeats);
-      if(numberOfSeats > 0)
+      String isUserGoing = tripDetails.get("usergoing").asText();
+      if(numberOfSeats == 0 && objectCoRider != null){ throw new RuntimeException("Please supply correct details"); }
+          if(isUserGoing.contains("true")) {
+              TripBooking bookTrips = userInterface.bookTrips(id, phonenumber, numberOfSeats, paymentreferenceid,fullname);
+              u.setResponse("Trip Details Successfully Registered");
+          } else if(isUserGoing.contains("false") && numberOfSeats > 0){ u.setResponse("Extra-Riders Successfully Registered Only"); }
+                 if(numberOfSeats > 0)
+                    if(objectCoRider == null){throw new RuntimeException("Please supply details for extra riders");}
            try {
                for (int i = 0; i <= numberOfSeats; i++) {
                JsonNode riderNames = objectCoRider.get(i).get("coridername");
@@ -154,9 +177,9 @@ public class FirstController {
                userInterface.registerCoRiders(coRiderName,coRiderPhonenumber,phonenumber);
                }
                } catch (NullPointerException n){}
-      u.setResponse("Booking Successful");
       u.setStatus(HttpStatus.OK);
       u.setMessage("Success");
+      u.setResponsecode("00");
       return u;
       }
 
@@ -169,6 +192,7 @@ public class FirstController {
       u.setMessage("success");
       u.setStatus(HttpStatus.GONE);
       u.setResponse("User deleted successfully");
+      u.setResponsecode("00");
       return u;
       }
       
@@ -179,6 +203,7 @@ public class FirstController {
       u.setResponse(userInterface.adminToCreateTripsForBooking(trip));
       u.setStatus(HttpStatus.OK);
       u.setMessage("success");
+      u.setResponsecode("00");
       return u;
       }
 
@@ -192,6 +217,7 @@ public class FirstController {
       u.setResponse(userInterface.searchPassengerOnTrip(search));
       u.setStatus(HttpStatus.OK);
       u.setMessage("success");
+      u.setResponsecode("00");
       return u;
       }
     
@@ -204,6 +230,7 @@ public class FirstController {
        u.setResponse(userInterface.getAllPassengersOnATrip(passengers));
        u.setStatus(HttpStatus.OK);
        u.setMessage("success");
+       u.setResponsecode("00");
        return u;
       }
 
@@ -269,6 +296,7 @@ public class FirstController {
            u.setResponse(userInterface.sendTokenToUpdatePassword(user.getPhonenumber()));
            u.setStatus(HttpStatus.OK);
            u.setMessage("success");
+           u.setResponsecode("00");
            return u;
     }
 
@@ -280,6 +308,7 @@ public class FirstController {
            u.setResponse(userInterface.confirmPasswordResetToken(user.getPasswordupdatetoken(),user.getPhonenumber()));
            u.setStatus(HttpStatus.OK);
            u.setMessage("success");
+           u.setResponsecode("00");
            return u;
     }
 
@@ -290,6 +319,7 @@ public class FirstController {
            u.setResponse(userInterface.updatePassword(user.getPassword(),user.getPhonenumber()));
            u.setStatus(HttpStatus.OK);
            u.setMessage("success");
+           u.setResponsecode("00");
            return u;
     }
 
@@ -302,6 +332,7 @@ public class FirstController {
            u.setResponse(userInterface.getTotalAmountOfRegisteredUsers());
            u.setStatus(HttpStatus.OK);
            u.setMessage("success");
+           u.setResponsecode("00");
            return u;
 }
 
@@ -313,6 +344,7 @@ public class FirstController {
            u.setResponse(userInterface.createBusStationAdmin(user));
            u.setStatus(HttpStatus.OK);
            u.setMessage("success");
+           u.setResponsecode("00");
            return u;
     }
 
@@ -324,6 +356,7 @@ public class FirstController {
            u.setResponse(userInterface.getListOfAllUsers());
            u.setStatus(HttpStatus.OK);
            u.setMessage("success");
+           u.setResponsecode("00");
         return u;
     }
 
@@ -336,6 +369,7 @@ public class FirstController {
             u.setResponse(userInterface.verifyTokenForUserAuthentication(user.getToken(),user.getPhonenumber()));
             u.setStatus(HttpStatus.OK);
             u.setMessage("success");
+            u.setResponsecode("00");
             return u;
         }
 
@@ -348,6 +382,7 @@ public class FirstController {
            u.setResponse(userInterface.getListOfTripsBasedOnPriceInDescOrder(trip.getDeparture(),trip.getDestination(),trip.getDate()));
             u.setStatus(HttpStatus.OK);
             u.setMessage("success");
+            u.setResponsecode("00");
             return u;
         }
 
@@ -358,6 +393,7 @@ public class FirstController {
            a.setResponse(userInterface.getAllTripsFilteredbyUser(trip.getPrice(),trip.getDeparture(),trip.getDestination()));
             a.setStatus(HttpStatus.OK);
             a.setMessage("success");
+            a.setResponsecode("00");
             return a;
         }
 
@@ -368,6 +404,7 @@ public class FirstController {
             u.setResponse(userInterface.getUserProfile(user.getPhonenumber()));
             u.setStatus(HttpStatus.OK);
             u.setMessage("success");
+            u.setResponsecode("00");
             return u;
         }
 
@@ -379,6 +416,7 @@ public class FirstController {
                         trip.getDate(),trip.getVehiclenumber(),trip.getTransportcompany()));
                 u.setStatus(HttpStatus.OK);
                 u.setMessage("success");
+                u.setResponsecode("00");
                 return u;
             }
 
@@ -390,6 +428,7 @@ public class FirstController {
                     u.setResponse(userInterface.deleteMobileUserAccountByAdmin(id));
                     u.setStatus(HttpStatus.OK);
                     u.setMessage("success");
+                    u.setResponsecode("00");
                     return u;
                 }
 
@@ -399,6 +438,7 @@ public class FirstController {
                     u.setResponse(userInterface.getListOfTripsBasedOnPriceInAscendingOrder(trip.getDeparture(),trip.getDestination(),trip.getDate()));
                     u.setStatus(HttpStatus.OK);
                     u.setMessage("success");
+                    u.setResponsecode("00");
                     return u;
                 }
 
@@ -409,6 +449,7 @@ public class FirstController {
                     u.setResponse(userInterface.getTripDetailsUsingId(trips.getId()));
                     u.setStatus(HttpStatus.OK);
                     u.setMessage("success");
+                    u.setResponsecode("00");
                     return u;
                 }
 
@@ -419,9 +460,39 @@ public class FirstController {
                     u.setResponse(userInterface.getBookedTrips(trip.getPhonenumber()));
                     u.setStatus(HttpStatus.OK);
                     u.setMessage("success");
+                    u.setResponsecode("00");
                     return u;
                 }
 
+
+    @RequestMapping(value = "/adminLogIn", method = RequestMethod.POST)
+    public ResponseEntity<?> adminLogIn(@RequestBody User authenticationRequest) throws Exception {
+        try {
+            authenticationmanager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getPhonenumber(), authenticationRequest.getPassword()));
+        } catch (BadCredentialsException e) {
+            throw new Exception("Wrong credentials", e);
+        }
+        final UserDetails userDetails = myUserDetailsService.loadUserByUsername(authenticationRequest.getPhonenumber());
+        if (userDetails == null) {
+            throw new RuntimeException("User does not exist.");
+        }
+
+        User user = userInterface.adminSignIn(authenticationRequest.getPhonenumber(),authenticationRequest.getPassword());
+        user.setPassword(null);
+        user.setPasswordupdatetoken(null);
+        user.setPasswordgentokentime(null);
+        user.setOtpgenerationtime(null);
+        user.setToken(null);
+
+        try{
+            ObjectMapper mapper = new ObjectMapper();
+            logger.info(mapper.writeValueAsString(userDetails));
+        }catch (Exception e){
+
+        }
+        final String jwt = jwttokenutil.generateToken(userDetails);
+        return ResponseEntity.ok(new AuthenticationResponse(jwt,user,"N/A"));
+    }
 
 
 

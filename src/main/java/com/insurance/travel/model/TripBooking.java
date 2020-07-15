@@ -15,6 +15,7 @@ import javax.persistence.Table;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  *
@@ -29,7 +30,7 @@ public class TripBooking {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
     
-    @Column(name = "transportcompany", nullable = false)
+    @Column(name = "transportcompany", nullable = true)
     private String transportcompany;
 
     @Column(name = "departure" , nullable = false)
@@ -39,13 +40,13 @@ public class TripBooking {
     private String destination;
     
     @Column(name = "departuredate", nullable = false)
-    private String departuredate;
+    private Date departuredate;
     
-    @Column(name = "price", nullable = false)
+    @Column(name = "price", nullable = true)
     private BigDecimal price;
     
-    @Column(name = "numberofseats", nullable = false)
-    private int numberofseats;
+    @Column(name = "extrariders", nullable = false)
+    private int extrariders;
     
     
     @Column(name = "fullname", nullable = false)
@@ -53,6 +54,28 @@ public class TripBooking {
     
     @Column(name = "phonenumber", nullable = false)
     private String phonenumber;
+
+    @Column(name = "paymentreferenceid", nullable = true)
+    private String paymentreferenceid;
+
+    @Column(name = "paymentstatus", nullable = true)
+    private String paymentstatus;
+
+    public String getPaymentreferenceid() {
+        return paymentreferenceid;
+    }
+
+    public void setPaymentreferenceid(String paymentreferenceid) {
+        this.paymentreferenceid = paymentreferenceid;
+    }
+
+    public String getPaymentstatus() {
+        return paymentstatus;
+    }
+
+    public void setPaymentstatus(String paymentstatus) {
+        this.paymentstatus = paymentstatus;
+    }
 
     public String getDeparture() {
         return departure;
@@ -103,11 +126,11 @@ public class TripBooking {
         this.destination = destination;
     }
 
-    public String getDeparturedate() {
+    public Date getDeparturedate() {
         return departuredate;
     }
 
-    public void setDeparturedate(String departuredate) {
+    public void setDeparturedate(Date departuredate) {
         this.departuredate = departuredate;
     }
 
@@ -119,18 +142,14 @@ public class TripBooking {
         this.price = price;
     }
 
-    public int getNumberofseats() {
-        return numberofseats;
+    public int getExtrariders() {
+        return extrariders;
     }
 
-    public void setNumberofseats(int numberofseats) {
-        this.numberofseats = numberofseats;
+    public void setExtrariders(int extrariders) {
+        this.extrariders = extrariders;
     }
     
-    
-    
-    
-    
-    
+
     
 }
